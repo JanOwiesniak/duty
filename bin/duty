@@ -3,7 +3,7 @@
 module Duty
   class CLI
     def exec
-      $stdout.puts "usage: duty <command> [<args>]"
+      $stdout.puts "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
     end
   end
 end
