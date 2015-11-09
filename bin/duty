@@ -11,19 +11,29 @@ module Duty
         if @args[0] == 'new-feature'
           if name = @args[1]
             bullet = "\u2022".encode('utf-8')
-            write "What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`"
+            write Message.new("What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`").to_s
           else
-            write "Creates a new feature branch\n\nusage: duty new-feature <name>"
+            write Message.new("Creates a new feature branch\n\nusage: duty new-feature <name>").to_s
           end
         else
-          write "duty: `#{@args.join(' ')}` is not a duty command"
+          write Message.new("duty: `#{@args.join(' ')}` is not a duty command").to_s
         end
       else
-        write "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
+        write Message.new("usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch").to_s
       end
     end
 
     private
+
+    class Message
+      def initialize(string)
+        @string = string
+      end
+
+      def to_s
+        @string
+      end
+    end
 
     def write(msg)
       $stdout.puts msg
