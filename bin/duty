@@ -11,16 +11,22 @@ module Duty
         if @args[0] == 'new-feature'
           if name = @args[1]
             bullet = "\u2022".encode('utf-8')
-            $stdout.puts "What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`"
+            write "What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`"
           else
-            $stdout.puts "Creates a new feature branch\n\nusage: duty new-feature <name>"
+            write "Creates a new feature branch\n\nusage: duty new-feature <name>"
           end
         else
-          $stdout.puts "duty: `#{@args.join(' ')}` is not a duty command"
+          write "duty: `#{@args.join(' ')}` is not a duty command"
         end
       else
-        $stdout.puts "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
+        write "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
       end
+    end
+
+    private
+
+    def write(msg)
+      $stdout.puts msg
     end
   end
 end
