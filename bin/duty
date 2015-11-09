@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+module Duty
+  class CLI
+    def exec
+      $stdout.puts "usage: duty <command> [<args>]"
+    end
+  end
+end
+
+Duty::CLI.new.exec
