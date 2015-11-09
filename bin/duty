@@ -43,7 +43,14 @@ module Duty
       private
 
       def message
-        "What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`"
+        <<-msg
+          What just happend:
+        
+          #{bullet} Checked out `master` branch
+          #{bullet} Created new feature branch `feature\/#{name}`
+          #{bullet} Checked out new feature branch `feature\/#{name}`
+          #{bullet} Pushed new feature branch `feature\/#{name}` to `origin`
+        msg
       end
 
       def name
@@ -64,11 +71,13 @@ module Duty
       private
 
       def message
-        "duty: `#{args.join(' ')}` is not a duty command"
+        <<-msg
+          duty: `#{args}` is not a duty command
+        msg
       end
 
       def args
-        @args
+        @args.join(' ')
       end
     end
 
@@ -80,7 +89,11 @@ module Duty
       private
 
       def message
-        "Creates a new feature branch\n\nusage: duty new-feature <name>"
+        <<-msg
+          Creates a new feature branch
+
+          usage: duty new-feature <name>
+        msg
       end
     end
 
@@ -92,12 +105,22 @@ module Duty
       private
 
       def message
-        "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
+        <<-msg
+          usage: duty <command> [<args>]
+
+          Commands:
+
+          new-feature\tCreates a new feature branch
+        msg
       end
     end
 
     def write(msg)
-      $stdout.puts msg
+      $stdout.puts remove_starting_whitespaces(msg) 
+    end
+
+    def remove_starting_whitespaces(msg)
+      msg.gsub(/^ +/,'')
     end
   end
 end
