@@ -2,10 +2,18 @@
 
 module Duty
   class CLI
+    def initialize(args)
+      @args = args
+    end
+
     def exec
-      $stdout.puts "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
+      if @args.any?
+        $stdout.puts "duty: `#{@args.join(' ')}` is not a duty command\n\n"
+      else
+        $stdout.puts "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
+      end
     end
   end
 end
 
-Duty::CLI.new.exec
+Duty::CLI.new(ARGV).exec

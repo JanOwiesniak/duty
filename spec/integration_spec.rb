@@ -16,6 +16,14 @@ class IntegrationSpec < MiniTest::Spec
     end
   end
 
+  describe 'with unknown command' do
+    it 'explains that the given command is invalid' do
+      assert_stdout /duty: `foo bar` is not a duty command\s{2}/ do
+        exec('bin/duty foo bar')
+      end
+    end
+  end
+
   private
 
   def assert_stdout(expected, &command)
