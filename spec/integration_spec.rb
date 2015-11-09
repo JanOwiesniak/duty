@@ -24,6 +24,22 @@ class IntegrationSpec < MiniTest::Spec
     end
   end
 
+  describe 'with known command' do
+    describe 'new-feature' do
+      it 'describes the command' do
+        assert_stdout /Creates a new feature branch\s{2}/ do
+          exec('bin/duty new-feature')
+        end
+      end
+
+      it 'explains how to use the command' do
+        assert_stdout /usage: duty new-feature <name>\s{2}/ do
+          exec('bin/duty new-feature')
+        end
+      end
+    end
+  end
+
   private
 
   def assert_stdout(expected, &command)

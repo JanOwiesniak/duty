@@ -8,7 +8,11 @@ module Duty
 
     def exec
       if @args.any?
-        $stdout.puts "duty: `#{@args.join(' ')}` is not a duty command\n\n"
+        if @args.include?('new-feature')
+          $stdout.puts "Creates a new feature branch\n\nusage: duty new-feature <name>\n\n"
+        else
+          $stdout.puts "duty: `#{@args.join(' ')}` is not a duty command\n\n"
+        end
       else
         $stdout.puts "usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch"
       end
