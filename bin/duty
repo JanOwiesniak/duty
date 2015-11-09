@@ -117,6 +117,7 @@ module Duty
 
     def write(msg)
       $stdout.puts remove_starting_whitespaces(msg) 
+      exit 0
     end
 
     def remove_starting_whitespaces(msg)

@@ -79,6 +79,7 @@ class IntegrationSpec < MiniTest::Spec
   def assert_stdout(expected, &command)
     stdout, stderr, status = yield command
     assert_match expected, stdout
+    assert_equal true, status.success?
   end
 
   def exec(command)
