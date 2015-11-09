@@ -9,17 +9,16 @@ module Duty
     def exec
       if @args.any?
         if @args[0] == 'new-feature'
-          if name = @args[1]
-            bullet = "\u2022".encode('utf-8')
-            write Message.new("What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`").to_s
+          if @args[1]
+            write FeatureBranchSuccessMessage.new(@args[1]).to_s
           else
-            write Message.new("Creates a new feature branch\n\nusage: duty new-feature <name>").to_s
+            write FeatureBranchExplainMessage.new.to_s
           end
         else
-          write Message.new("duty: `#{@args.join(' ')}` is not a duty command").to_s
+          write InvalidCommandMessage.new(@args).to_s
         end
       else
-        write Message.new("usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch").to_s
+        write UsageMessage.new.to_s
       end
     end
 
@@ -32,6 +31,36 @@ module Duty
 
       def to_s
         @string
+      end
+    end
+
+    class FeatureBranchSuccessMessage < Message
+      def initialize(name)
+        super("What just happend:\n\n#{bullet} Checked out `master` branch\n#{bullet} Created new feature branch `feature\/#{name}`\n#{bullet} Checked out new feature branch `feature\/#{name}`\n#{bullet} Pushed new feature branch `feature\/#{name}` to `origin`")
+      end
+
+      private
+
+      def bullet
+        "\u2022".encode('utf-8')
+      end
+    end
+
+    class InvalidCommandMessage < Message
+      def initialize(args)
+        super("duty: `#{args.join(' ')}` is not a duty command")
+      end
+    end
+
+    class FeatureBranchExplainMessage < Message
+      def initialize
+        super("Creates a new feature branch\n\nusage: duty new-feature <name>")
+      end
+    end
+
+    class UsageMessage < Message
+      def initialize
+        super("usage: duty <command> [<args>]\n\nCommands:\n\nnew-feature\tCreates a new feature branch")
       end
     end
 
