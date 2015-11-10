@@ -83,7 +83,8 @@ class IntegrationSpec < MiniTest::Spec
   end
 
   def exec(command)
-    capture(command)
+    dummy = "#{__dir__}/dummy"
+    capture(command, :chdir => dummy)
   end
 
   def capture(command, options = {})
