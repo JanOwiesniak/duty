@@ -8,7 +8,7 @@ Do your duty, let me handle the rest.
 
 ```
 gem install duty
-``
+```
 
 ## Add executable to your $PATH
 
