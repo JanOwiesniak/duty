@@ -7,7 +7,7 @@ Do your duty, let me handle the rest.
 ## Install
 
 ```
-gem install duty
+not published on rubygems.org yet
 ```
 
 ## Add executable to your $PATH
