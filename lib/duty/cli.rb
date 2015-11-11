@@ -6,8 +6,8 @@ module Duty
 
     def exec
       write ExplainUsage.new if missing_command? 
-      write InvalidCommand.new(@args) if invalid_command?
-      write NewFeature.new(@args) if new_feature?
+      write ExplainInvalidCommand.new(@args) if invalid_command?
+      write ExecuteCommand.new(@args)
     end
 
     private
@@ -24,10 +24,7 @@ module Duty
       ['new-feature']
     end
 
-    def new_feature?
-      @args[0] == 'new-feature'
-    end
-
+    # Extract into high level command
     class ExplainUsage
       def message
         <<-msg
@@ -40,7 +37,8 @@ module Duty
       end
     end
 
-    class InvalidCommand
+    # Extract into high level command
+    class ExplainInvalidCommand
       def initialize(args)
         @args = args
       end
@@ -58,60 +56,72 @@ module Duty
       end
     end
 
-    class NewFeature
+    # Extract into command - Should know about all high level command
+    class ExecuteCommand
       def initialize(args)
         @args = args
       end
 
       def message
         if args[1]
-          Success.new(args[1]).message
+          executor = Duty::Commands::NewFeature.new(args[1]).call
+          SummaryCommand.new(executor).message
         else
-          Explain.new.message
+          Duty::Commands::NewFeature.new.usage
         end
       end
 
       def args
         @args
       end
+    end
+
+    # Extract into low level command
+    class SummaryCommand
+      def initialize(executor)
+        @executor = executor
+      end
+
+      def message
+        <<-msg
+          What just happend:
+
+        #{formatted}
+        msg
+      end
 
       private
 
-      class Success
-        def initialize(name)
-          @name = name
-        end
+      def formatted
+        commands = @executor.executed.map do |command|
+          describe(command)
+        end.join("\n")
+      end
 
-        def message
-          <<-msg
-          What just happend:
-
-          #{bullet} Checked out `master` branch
-          #{bullet} Created new feature branch `feature\/#{name}`
-          #{bullet} Checked out new feature branch `feature\/#{name}`
-          #{bullet} Pushed new feature branch `feature\/#{name}` to `origin`
-          msg
-        end
-
-        private
-
-        def name
-          @name
-        end
-
-        def bullet
-          "\u2022".encode('utf-8')
+      def describe(command)
+        "#{state(command)} #{command.describe}".tap do |s|
+          s << error(command) if command.error?
         end
       end
 
-      class Explain
-        def message
-          <<-msg
-          Creates a new feature branch
+      def state(command)
+        command.error? ? cross_mark : check_mark
+      end
 
-          usage: duty new-feature <name>
-          msg
-        end
+      def error(command)
+        " | Executed `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
+      end
+
+      def cross_mark
+        unicode("2715")
+      end
+
+      def check_mark
+        unicode("2713")
+      end
+
+      def unicode(code)
+        ["0x#{code}".hex].pack('U')
       end
     end
 
