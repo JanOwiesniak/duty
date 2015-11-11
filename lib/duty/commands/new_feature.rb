@@ -1,4 +1,5 @@
 require 'duty/system'
+require 'duty/worker'
 
 module Duty
   module Commands
@@ -12,9 +13,9 @@ module Duty
       end
 
       def call(system = Duty::System.new)
-        executor = build_executer(system)
-        executor.execute if name
-        executor
+        worker = build_worker(system)
+        worker.execute if name
+        worker
       end
 
       private
@@ -31,8 +32,8 @@ module Duty
         msg
       end
 
-      def build_executer(system)
-        CommandExecutor.new(build_commands(system))
+      def build_worker(system)
+        Worker.new(build_commands(system))
       end
 
       def build_commands(system)
@@ -43,23 +44,6 @@ module Duty
         ]
       end
 
-      class CommandExecutor
-        def initialize(commands)
-          @commands = commands
-          @executed = []
-        end
-
-        def execute
-          @commands.each do |command|
-            command.execute
-            @executed << command
-          end
-        end
-
-        def executed
-          @executed
-        end
-      end
 
       class Command
         def initialize(cmd, desciption, system)
