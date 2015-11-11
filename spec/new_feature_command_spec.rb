@@ -27,7 +27,7 @@ class NewFeatureCommandsSpec < MiniTest::Spec
           assert_equal 3, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
           assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
-          assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
+          assert_equal "git push -u origin 'feature/awesome'", system.calls[2]
 
           executer.executed.each do |command|
             assert_equal true, command.executed?
@@ -45,7 +45,7 @@ class NewFeatureCommandsSpec < MiniTest::Spec
           assert_equal 3, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
           assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
-          assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
+          assert_equal "git push -u origin 'feature/awesome'", system.calls[2]
 
           executer.executed.each do |command|
             assert_equal true, command.executed?
