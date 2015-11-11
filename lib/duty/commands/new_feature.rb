@@ -39,10 +39,14 @@ module Duty
 
       def build_commands(system)
         [
-          Duty::Command.new('git checkout master', 'Checkout `master` branch', system),
-          Duty::Command.new("git checkout -b 'feature/#{name}'", "Checkout `feature/#{name}` branch", system),
-          Duty::Command.new("git push -u origin 'feature/#{name}'", "Push `feature/#{name}` branch to `origin`", system)
+          build_command('git checkout master', 'Checkout `master` branch', system),
+          build_command("git checkout -b 'feature/#{name}'", "Checkout `feature/#{name}` branch", system),
+          build_command("git push -u origin 'feature/#{name}'", "Push `feature/#{name}` branch to `origin`", system)
         ]
+      end
+
+      def build_command(cmd, description, system)
+        Duty::Command.new(cmd, description, system)
       end
     end
   end
