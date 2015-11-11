@@ -24,11 +24,11 @@ duty
 
 ### Create new feature
 
-It checks out the `master` branch.
-It creates a new feature branch called `feature/<name>`.
-It switches to the new feature branch.
-It sets the upstream to `origin/feature/<name>`.
-It pushs the new feature branch to origin.
+* It checks out the `master` branch.
+* It creates a new feature branch called `feature/<name>`.
+* It switches to the new feature branch.
+* It sets the upstream to `origin/feature/<name>`.
+* It pushs the new feature branch to origin.
 
 ```
 duty new-feature <name>
