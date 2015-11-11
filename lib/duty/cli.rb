@@ -5,9 +5,9 @@ module Duty
     end
 
     def exec
-      write ExplainUsage.new if missing_command? 
-      write ExplainInvalidCommand.new(@args) if invalid_command?
-      write ExecuteCommand.new(@args)
+      stdout ExplainDuty.new if missing_command? 
+      stdout ExplainCommands.new(@args) if invalid_command?
+      stdout ExecuteCommands.new(@args)
     end
 
     private
@@ -24,9 +24,18 @@ module Duty
       ['new-feature']
     end
 
-    # Extract into high level command
-    class ExplainUsage
-      def message
+    def stdout(command)
+      string = command.to_s
+      $stdout.puts remove_starting_whitespaces(string)
+      exit 0
+    end
+
+    def remove_starting_whitespaces(msg)
+      msg.gsub(/^ +/,'')
+    end
+
+    class ExplainDuty
+      def to_s
         <<-msg
           usage: duty <command> [<args>]
 
@@ -37,52 +46,39 @@ module Duty
       end
     end
 
-    # Extract into high level command
-    class ExplainInvalidCommand
+    class ExplainCommands
       def initialize(args)
         @args = args
       end
 
-      def message
+      def to_s
         <<-msg
-          duty: `#{args}` is not a duty command
+          duty: `#{@args.join(' ')}` is not a duty command
         msg
-      end
-
-      private
-
-      def args
-        @args.join(' ')
       end
     end
 
-    # Extract into command - Should know about all high level command
-    class ExecuteCommand
+    class ExecuteCommands
       def initialize(args)
         @args = args
       end
 
-      def message
-        if args[1]
-          executor = Duty::Commands::NewFeature.new(args[1]).call
-          SummaryCommand.new(executor).message
+      def to_s
+        if @args[1]
+          executor = Duty::Commands::NewFeature.new(@args[1]).call
+          ExecutionSummary.new(executor).to_s
         else
           Duty::Commands::NewFeature.new.usage
         end
       end
-
-      def args
-        @args
-      end
     end
 
-    # Extract into low level command
-    class SummaryCommand
+    class ExecutionSummary
       def initialize(executor)
         @executor = executor
       end
 
-      def message
+      def to_s
         <<-msg
           What just happend:
 
@@ -123,16 +119,6 @@ module Duty
       def unicode(code)
         ["0x#{code}".hex].pack('U')
       end
-    end
-
-    def write(command)
-      message = command.message
-      $stdout.puts remove_starting_whitespaces(message) 
-      exit 0
-    end
-
-    def remove_starting_whitespaces(msg)
-      msg.gsub(/^ +/,'')
     end
   end
 end
