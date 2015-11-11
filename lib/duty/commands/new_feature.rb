@@ -1,12 +1,8 @@
+require 'duty/system'
+
 module Duty
   module Commands
     class NewFeature
-      class System
-        def call(cmd)
-          Open3.capture3(cmd)
-        end
-      end
-
       def initialize(name = nil)
         @name = name
       end
@@ -15,7 +11,7 @@ module Duty
         _usage.gsub(/^ +/,'')
       end
 
-      def call(system = System.new)
+      def call(system = Duty::System.new)
         executor = build_executer(system)
         executor.execute if name
         executor
