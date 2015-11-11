@@ -1,5 +1,6 @@
 require 'duty/system'
 require 'duty/worker'
+require 'duty/command'
 
 module Duty
   module Commands
@@ -42,51 +43,6 @@ module Duty
           Command.new("git checkout -b 'feature/#{name}'", "Checkout `feature/#{name}` branch", system),
           Command.new("git push -u origin 'feature/#{name}'", "Push `feature/#{name}` branch to `origin`", system)
         ]
-      end
-
-
-      class Command
-        def initialize(cmd, desciption, system)
-          @cmd = cmd
-          @desciption = desciption
-          @system = system
-          @executed = false
-          @error = nil
-        end
-
-        def cmd
-          @cmd
-        end
-
-        def pwd
-          Dir.pwd
-        end
-
-        def describe
-          @desciption
-        end
-
-        def executed?
-          @executed
-        end
-
-        def error?
-          !!error
-        end
-
-        def error
-          if @executed == false
-            'Not executed'
-          else
-            @error
-          end
-        end
-
-        def execute
-          @executed = true
-          stdout, stderr, status = @system.call(@cmd)
-          @error = stderr if status != 0
-        end
       end
     end
   end
