@@ -12,11 +12,11 @@ module Duty
       end
 
       def usage
-        <<-msg
+        <<-EOF
 Creates a new feature branch
 
 Usage: duty new-feature <name>
-        msg
+        EOF
       end
 
       def valid?

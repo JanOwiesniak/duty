@@ -25,13 +25,13 @@ module Duty
         "  " + command_name_for(klass).ljust(20) + klass.description
       end.join("\n")
 
-      msg = <<-MSG
+      msg = <<-EOF
 Usage: duty <command> [<args>]
 
 Commands:
 
 #{commands_description}
-      MSG
+      EOF
     end
 
     def missing_command?
@@ -73,9 +73,7 @@ Commands:
     end
 
     def invalid_command(args)
-      <<-msg
-          duty: `#{args.join(' ')}` is not a duty command
-      msg
+      "duty: `#{args.join(' ')}` is not a duty command"
     end
 
     def present(command)
@@ -113,11 +111,11 @@ Commands:
         end
 
         def to_s
-          <<-msg
-          What just happend:
+          <<-EOF
+What just happend:
 
-          #{formatted}
-          msg
+#{formatted}
+          EOF
         end
 
         private

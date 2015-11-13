@@ -15,11 +15,11 @@ module Duty
       end
 
       def usage
-        <<-msg
+        <<-EOF
           TODO: Describe your command by overwriting the `usage` method in your command class
 
           usage: duty <your-command> <your-arguments>
-        msg
+        EOF
       end
 
       def valid?
