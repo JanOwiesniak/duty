@@ -43,7 +43,7 @@ duty <your-command>
 ```
 module Duty
   module Commands
-    class FooBar
+    class FooBar < Duty::Commands::Base
     end
   end
 end
