@@ -22,7 +22,45 @@ export PATH="$PATH:$HOME/path/to/duty/bin"
 duty
 ```
 
-### Create new feature
+## Create new command
+
+* Create a new class in the `Duty::Commands` namespace
+* Put it into `lib/duty/commands/<your_command>.rb`
+* Require it from `lib/duty/commands.rb`
+
+Your new command will be immediately available from the CLI
+
+```
+duty <your-command>
+```
+
+### Example
+
+#### FooBar command
+
+`lib/duty/commands/foo_bar.rb`
+
+```
+module Duty
+  module Commands
+    class FooBar
+    end
+  end
+end
+```
+
+#### CLI
+
+Fire up the CLI and execute your new command.
+Duty will tell you what you have to do next.
+
+```
+duty <your-command>
+```
+
+## Available commands
+
+### New feature
 
 * It checks out the `master` branch.
 * It creates a new feature branch called `feature/<name>`.
