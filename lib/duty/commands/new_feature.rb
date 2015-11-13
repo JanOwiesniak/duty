@@ -5,12 +5,20 @@ require 'duty/command'
 module Duty
   module Commands
     class NewFeature
-      def initialize(name = nil)
-        @name = name
+      def initialize(*args)
+        @name = [args].flatten.first
       end
 
       def usage
-        _usage.gsub(/^ +/,'')
+        <<-msg
+          Creates a new feature branch
+
+          usage: duty new-feature <name>
+        msg
+      end
+
+      def valid?
+        !!@name
       end
 
       def call(system = Duty::System.new)
@@ -23,14 +31,6 @@ module Duty
 
       def name
         @name
-      end
-
-      def _usage
-        <<-msg
-          Creates a new feature branch
-
-          usage: duty new-feature <name>
-        msg
       end
 
       def build_worker(system)

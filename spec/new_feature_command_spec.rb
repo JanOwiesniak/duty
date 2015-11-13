@@ -3,8 +3,13 @@ require 'duty'
 
 class NewFeatureCommandsSpec < MiniTest::Spec
   describe 'new-feature' do
+    it 'is valid with a given branch name' do
+      refute Duty::Commands::NewFeature.new.valid?
+      assert Duty::Commands::NewFeature.new('branch-name').valid?
+    end
+
     it 'knows how it should be used' do
-      expected = /Creates a new feature branch\s{2}usage: duty new-feature <name>/
+      expected = /Creates a new feature branch\s*usage: duty new-feature <name>/
       explanation = Duty::Commands::NewFeature.new.usage
       assert_match expected, explanation
     end

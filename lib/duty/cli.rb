@@ -5,119 +5,140 @@ module Duty
     end
 
     def exec
-      stdout ExplainDuty.new if missing_command? 
-      stdout ExplainCommands.new(@args) if invalid_command?
-      stdout ExecuteCommands.new(@args)
+      stdout explain_duty if missing_command? 
+      stdout execute_commands(@args)
     end
 
     private
 
-    def missing_command?
-      @args.empty?
-    end
-
-    def invalid_command?
-      !valid_commands.include? @args[0]
-    end
-
-    def valid_commands
-      ['new-feature']
-    end
-
-    def stdout(command)
-      string = command.to_s
-      $stdout.puts remove_starting_whitespaces(string)
+    def stdout(string)
+      $stdout.puts strip(string)
       exit 0
     end
 
-    def remove_starting_whitespaces(msg)
-      msg.gsub(/^ +/,'')
+    def strip(string)
+      string.gsub(/ +/, " ").gsub(/^ +/, "")
     end
 
-    class ExplainDuty
-      def to_s
-        <<-msg
+    def explain_duty
+      <<-msg
           usage: duty <command> [<args>]
 
           Commands:
 
           new-feature\tCreates a new feature branch
-        msg
-      end
+      msg
     end
 
-    class ExplainCommands
-      def initialize(args)
-        @args = args
-      end
-
-      def to_s
-        <<-msg
-          duty: `#{@args.join(' ')}` is not a duty command
-        msg
-      end
+    def missing_command?
+      @args.empty?
     end
 
-    class ExecuteCommands
-      def initialize(args)
-        @args = args
+    def execute_commands(args)
+      begin
+        command = command_for(args)
+      rescue NameError => e
+        return invalid_command(args)
       end
 
-      def to_s
-        if @args[1]
-          executor = Duty::Commands::NewFeature.new(@args[1]).call
-          ExecutionSummary.new(executor).to_s
+      present(command)
+    end
+
+    def command_for(args)
+      command_string, *rest = args
+      command_class_for(command_string).new(rest)
+    end
+
+    def command_class_for(string)
+      command_class = command_to_class_name(string)
+      Object.const_get("Duty::Commands::#{command_class}")
+    end
+
+    def command_to_class_name(string)
+      string.split('-').collect(&:capitalize).join
+    end
+
+    def invalid_command(args)
+      <<-msg
+          duty: `#{args.join(' ')}` is not a duty command
+      msg
+    end
+
+    def present(command)
+      presenter_for(command).present
+    end
+
+    def presenter_for(command)
+      Presenter.new(command)
+    end
+
+    class Presenter
+      def initialize(command)
+        @command = command
+      end
+
+      def present
+        if command.valid?
+          executor = command.call
+          summary = Summary.new(executor)
+          summary.to_s
         else
-          Duty::Commands::NewFeature.new.usage
+          command.usage
         end
-      end
-    end
-
-    class ExecutionSummary
-      def initialize(executor)
-        @executor = executor
-      end
-
-      def to_s
-        <<-msg
-          What just happend:
-
-        #{formatted}
-        msg
       end
 
       private
 
-      def formatted
-        commands = @executor.executed.map do |command|
-          describe(command)
-        end.join("\n")
+      def command
+        @command
       end
 
-      def describe(command)
-        "#{state(command)} #{command.describe}".tap do |s|
-          s << error(command) if command.error?
+      class Summary
+        def initialize(executor)
+          @executor = executor
         end
-      end
 
-      def state(command)
-        command.error? ? cross_mark : check_mark
-      end
+        def to_s
+          <<-msg
+          What just happend:
 
-      def error(command)
-        " | Executed `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
-      end
+          #{formatted}
+          msg
+        end
 
-      def cross_mark
-        unicode("2715")
-      end
+        private
 
-      def check_mark
-        unicode("2713")
-      end
+        def formatted
+          commands = @executor.executed.map do |command|
+            describe(command)
+          end.join("\n")
+        end
 
-      def unicode(code)
-        ["0x#{code}".hex].pack('U')
+        def describe(command)
+          "#{state(command)} #{command.describe}".tap do |s|
+            s << error(command) if command.error?
+          end
+        end
+
+        def state(command)
+          command.error? ? cross_mark : check_mark
+        end
+
+        def error(command)
+          " | Executed `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
+        end
+
+        def cross_mark
+          unicode("2715")
+        end
+
+        def check_mark
+          unicode("2713")
+        end
+
+        def unicode(code)
+          ["0x#{code}".hex].pack('U')
+        end
       end
     end
   end
