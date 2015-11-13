@@ -5,7 +5,7 @@ module Duty
     end
 
     def exec
-      stdout explain_duty if missing_command?
+      stdout usage if missing_command?
       stdout execute_commands(@args)
     end
 
@@ -20,7 +20,7 @@ module Duty
       string.gsub(/ +/, " ").gsub(/^ +/, "")
     end
 
-    def explain_duty
+    def usage
       commands_description = CommandRegistry.all.map do |klass|
         "  " + command_name_for(klass).ljust(20) + klass.description
       end.join("\n")
