@@ -5,14 +5,14 @@ module Duty
     end
 
     def exec
-      stdout explain_duty if missing_command? 
+      stdout explain_duty if missing_command?
       stdout execute_commands(@args)
     end
 
     private
 
     def stdout(string)
-      $stdout.puts strip(string)
+      $stdout.puts string
       exit 0
     end
 
@@ -21,13 +21,17 @@ module Duty
     end
 
     def explain_duty
-      <<-msg
-          usage: duty <command> [<args>]
+      commands_description = CommandRegistry.all.map do |klass|
+        "  " + command_name_for(klass).ljust(20) + klass.description
+      end.join("\n")
 
-          Commands:
+      msg = <<-MSG
+Usage: duty <command> [<args>]
 
-          new-feature\tCreates a new feature branch
-      msg
+Commands:
+
+#{commands_description}
+      MSG
     end
 
     def missing_command?
@@ -52,6 +56,16 @@ module Duty
     def command_class_for(string)
       command_class = command_to_class_name(string)
       Object.const_get("Duty::Commands::#{command_class}")
+    end
+
+    def command_name_for(klass)
+      klass.to_s.
+        gsub(CommandRegistry::COMMAND_NAMESPACE.to_s+"::", "").
+        gsub(/([A-Z])/, '-\1').
+        split('-').
+        reject(&:empty?).
+        map(&:downcase).
+        join('-')
     end
 
     def command_to_class_name(string)

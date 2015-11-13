@@ -2,13 +2,15 @@ require 'duty/commands/base'
 
 module Duty
   module CommandRegistry
+    COMMAND_NAMESPACE = Duty::Commands
+
     class << self
       attr_accessor :commands
 
       def all
-        all_names = Duty::Commands.constants - [:Base]
+        all_names = COMMAND_NAMESPACE.constants - [:Base]
         all_names.map do |name|
-          Duty::Commands.const_get(name)
+          COMMAND_NAMESPACE.const_get(name)
         end
       end
 
