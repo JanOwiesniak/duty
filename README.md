@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/JanOwiesniak/duty.svg?branch=master)](https://travis-ci.org/JanOwiesniak/duty)
+
 # Duty
 
 Craft.
