@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name          = "Duty"
   spec.version       = Duty::VERSION
   spec.authors       = ["Jan Owiesniak"]
-  spec.email         = ["jowiesniak@gmail.com"]
+  spec.email         = ["owiesniak@mailbox.org"]
 
   spec.summary       = "High-level repository operations"
   spec.description   = "Duty provides high-level repository operations for common git tasks"
