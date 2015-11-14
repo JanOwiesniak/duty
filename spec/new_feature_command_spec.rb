@@ -9,7 +9,7 @@ class NewFeatureCommandsSpec < MiniTest::Spec
     end
 
     it 'knows how it should be used' do
-      expected = /Creates a new feature branch\s*usage: duty new-feature <name>/
+      expected = /Creates a new feature branch\s*Usage: duty new-feature <name>/
       explanation = Duty::Commands::NewFeature.new.usage
       assert_match expected, explanation
     end
