@@ -24,7 +24,7 @@ module Duty
         command_dir_regexp = /commands:\s*(.*)/
         command_dir = duty_config.match(command_dir_regexp)[1]
         if Dir.exists?(command_dir)
-          command_dir 
+          command_dir
         else
           error_message = <<-EOF
 Oops something went wrong!
@@ -57,16 +57,12 @@ Please check the `commands` section in your `.duty` file.
     end
 
     def usage
-      commands_description = registry.all.map do |klass|
-        "  " + command_name_for(klass).ljust(20) + klass.description
-      end.join("\n")
-
       msg = <<-EOF
 Usage: duty <command> [<args>]
 
 Commands:
 
-#{commands_description}
+#{commands_with_description}
       EOF
     end
 
@@ -106,6 +102,12 @@ Commands:
 
     def command_to_class_name(string)
       string.split('-').collect(&:capitalize).join
+    end
+
+    def commands_with_description
+      registry.all.map do |klass|
+        "  " + command_name_for(klass).ljust(20) + klass.description
+      end.join("\n")
     end
 
     def invalid_command(args)
