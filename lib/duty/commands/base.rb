@@ -14,11 +14,15 @@ module Duty
         worker
       end
 
+      def self.description
+        "TODO: Describe your command by overwriting the `description` class method in your command class"
+      end
+
       def usage
         <<-EOF
-          TODO: Describe your command by overwriting the `usage` method in your command class
+TODO: Describe how your command should be used by overwriting the `usage` method in your command class
 
-          usage: duty <your-command> <your-arguments>
+usage: duty <your-command> <your-arguments>
         EOF
       end
 
