@@ -3,16 +3,20 @@ require 'duty/commands/base'
 module Duty
   module Commands
     class NewFeature < Duty::Commands::Base
+      def self.description
+        "Creates a new feature branch"
+      end
+
       def initialize(*args)
         @name = [args].flatten.first
       end
 
       def usage
-        <<-msg
-          Creates a new feature branch
+        <<-EOF
+#{self.class.description}
 
-          usage: duty new-feature <name>
-        msg
+Usage: duty new-feature <name>
+        EOF
       end
 
       def valid?

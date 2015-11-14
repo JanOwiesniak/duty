@@ -4,13 +4,13 @@ require "open3"
 class IntegrationSpec < MiniTest::Spec
   describe 'without a command' do
     it 'explains how to use the executable' do
-      assert_stdout /usage: duty <command> \[<args>\]\s{1}/ do
+      assert_stdout /Usage: duty <command> \[<args>\]\s{1}/ do
         exec(duty)
       end
     end
 
     it 'lists all available commands' do
-      assert_stdout /Commands:\s{2}new-feature\tCreates a new feature branch\s{1}/ do
+      assert_stdout /Commands:\n\n\s{2}new-feature\s{9}Creates a new feature branch\n/ do
         exec(duty)
       end
     end
@@ -34,7 +34,7 @@ class IntegrationSpec < MiniTest::Spec
         end
 
         it 'explains how to use the command' do
-          assert_stdout /usage: duty new-feature <name>\s{1}/ do
+          assert_stdout /Usage: duty new-feature <name>\s{1}/ do
             exec("#{duty} new-feature")
           end
         end

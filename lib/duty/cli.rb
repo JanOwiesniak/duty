@@ -1,18 +1,54 @@
+require 'duty/commands/registry'
+
 module Duty
   class CLI
     def initialize(args)
       @args = args
+      boot_registry
     end
 
     def exec
-      stdout explain_duty if missing_command? 
+      stdout usage if missing_command?
       stdout execute_commands(@args)
     end
 
     private
 
+    def boot_registry
+      @registry = Duty::Commands::Registry.new(additional_command_dir).tap {|r| r.require_all}
+    end
+
+    def additional_command_dir
+      if File.exists?(duty_file)
+        duty_config = File.read(duty_file)
+        command_dir_regexp = /commands:\s*(.*)/
+        command_dir = duty_config.match(command_dir_regexp)[1]
+        if Dir.exists?(command_dir)
+          command_dir
+        else
+          error_message = <<-EOF
+Oops something went wrong!
+
+You defined `#{command_dir}` as an additional commands dir but this dir does not exist.
+Please check the `commands` section in your `.duty` file.
+          EOF
+
+          print error_message
+          exit -1
+        end
+      end
+    end
+
+    def duty_file
+      '.duty'
+    end
+
+    def registry
+      @registry
+    end
+
     def stdout(string)
-      $stdout.puts strip(string)
+      $stdout.puts string
       exit 0
     end
 
@@ -20,14 +56,14 @@ module Duty
       string.gsub(/ +/, " ").gsub(/^ +/, "")
     end
 
-    def explain_duty
-      <<-msg
-          usage: duty <command> [<args>]
+    def usage
+      msg = <<-EOF
+Usage: duty <command> [<args>]
 
-          Commands:
+Commands:
 
-          new-feature\tCreates a new feature branch
-      msg
+#{commands_with_description}
+      EOF
     end
 
     def missing_command?
@@ -54,14 +90,28 @@ module Duty
       Object.const_get("Duty::Commands::#{command_class}")
     end
 
+    def command_name_for(klass)
+      klass.to_s.
+        gsub(Commands::Registry::COMMAND_NAMESPACE.to_s+"::", "").
+        gsub(/([A-Z])/, '-\1').
+        split('-').
+        reject(&:empty?).
+        map(&:downcase).
+        join('-')
+    end
+
     def command_to_class_name(string)
       string.split('-').collect(&:capitalize).join
     end
 
+    def commands_with_description
+      registry.all.map do |klass|
+        "  " + command_name_for(klass).ljust(20) + klass.description
+      end.join("\n")
+    end
+
     def invalid_command(args)
-      <<-msg
-          duty: `#{args.join(' ')}` is not a duty command
-      msg
+      "duty: `#{args.join(' ')}` is not a duty command"
     end
 
     def present(command)
@@ -99,11 +149,11 @@ module Duty
         end
 
         def to_s
-          <<-msg
-          What just happend:
+          <<-EOF
+What just happend:
 
-          #{formatted}
-          msg
+#{formatted}
+          EOF
         end
 
         private
