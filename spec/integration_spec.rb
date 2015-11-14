@@ -10,7 +10,11 @@ class IntegrationSpec < MiniTest::Spec
     end
 
     it 'lists all available commands' do
-      assert_stdout /Commands:\n\n\s{2}new-feature\s{9}Creates a new feature branch\n/ do
+      assert_stdout /Commands:/ do
+        exec(duty)
+      end
+
+      assert_stdout /test\s*This is a test command/ do
         exec(duty)
       end
     end
@@ -25,43 +29,50 @@ class IntegrationSpec < MiniTest::Spec
   end
 
   describe 'with known command' do
-    describe 'new-feature' do
-      describe 'without name' do
+    describe 'test' do
+      describe 'invalid usage' do
         it 'describes the command' do
-          assert_stdout /Creates a new feature branch\s{1}/ do
-            exec("#{duty} new-feature")
+          assert_stdout /This is a test command\s{1}/ do
+            exec("#{duty} test")
           end
         end
 
         it 'explains how to use the command' do
-          assert_stdout /Usage: duty new-feature <name>\s{1}/ do
-            exec("#{duty} new-feature")
+          assert_stdout /Usage: duty test \[<args>\]\s{1}/ do
+            exec("#{duty} test")
           end
         end
       end
 
-      describe 'with name' do
+      describe 'valid usage' do
         it 'explains what just happend' do
           assert_stdout /What just happend:\s{2}/ do
-            exec('git init', 'git commit -m "" --allow-empty-message --allow-empty', 'git remote add origin .', "#{duty} new-feature my-awesome-feature")
+            exec("#{duty} test args")
           end
         end
 
-        it 'checks out the `master` branch' do
-          assert_stdout /#{check_mark} Checkout `master` branch\s{1}/ do
-            exec('git init', 'git commit -m "" --allow-empty-message --allow-empty', 'git remote add origin .', "#{duty} new-feature my-awesome-feature")
+        describe 'on failure' do
+          it 'presents all executed commands with adds additional errors' do
+            assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `\/tmp\/.*`, No such file or directory - this_wont_work/ do
+              exec("#{duty} test fail")
+            end
+
+ 
+            assert_stdout /#{check_mark} This was even greater\s{1}/ do
+              exec("#{duty} test fail")
+            end
           end
         end
 
-        it 'checks out the new feature branch' do
-          assert_stdout /#{check_mark} Checkout `feature\/my-awesome-feature` branch\s{1}/ do
-            exec('git init', 'git commit -m "" --allow-empty-message --allow-empty', 'git remote add origin .', "#{duty} new-feature my-awesome-feature")
-          end
-        end
+        describe 'on success' do
+          it 'presents all executed commands' do
+            assert_stdout /#{check_mark} Done something great\s{1}/ do
+              exec("#{duty} test success")
+            end
 
-        it 'pushs new feature branch to origin' do
-          assert_stdout /#{check_mark} Push `feature\/my-awesome-feature` branch to `origin`\s{1}/ do
-            exec('git init', 'git commit -m "" --allow-empty-message --allow-empty', 'git remote add origin .', "#{duty} new-feature my-awesome-feature")
+            assert_stdout /#{check_mark} This was even greater\s{1}/ do
+              exec("#{duty} test success")
+            end
           end
         end
       end
@@ -78,6 +89,10 @@ class IntegrationSpec < MiniTest::Spec
     "\u2713".encode('utf-8')
   end
 
+  def cross_mark
+    "\u2715".encode('utf-8')
+  end
+
   def assert_stdout(expected, &command)
     stdout, stderr, status = yield command
     assert_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
@@ -85,15 +100,20 @@ class IntegrationSpec < MiniTest::Spec
   end
 
   def exec(*commands)
+    duty_config = "commands: #{__dir__}/support"
     Dir.mktmpdir do |dir|
       commands.each do |command|
-        @last_command = capture(command, :chdir => dir)
+        @last_command = capture(command, :chdir => dir, :duty_config => duty_config)
       end
       @last_command
     end
   end
 
   def capture(command, options = {})
+    if duty_config = options.delete(:duty_config)
+      Open3.capture3("echo '#{duty_config}' > .duty", options)
+    end
+
     stdout, stderr, status = Open3.capture3(command, options)
   end
 end
