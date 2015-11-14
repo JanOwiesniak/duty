@@ -1,8 +1,5 @@
-require 'duty/command_registry'
-
-Duty::CommandRegistry.require_all
-Duty::CommandRegistry.all
-
+require 'duty/commands/registry'
+Duty::Commands::Registry.require_all
 
 module Duty
   module Commands

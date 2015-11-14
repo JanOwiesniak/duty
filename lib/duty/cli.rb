@@ -21,7 +21,7 @@ module Duty
     end
 
     def usage
-      commands_description = CommandRegistry.all.map do |klass|
+      commands_description = Duty::Commands::Registry.all.map do |klass|
         "  " + command_name_for(klass).ljust(20) + klass.description
       end.join("\n")
 
@@ -60,7 +60,7 @@ Commands:
 
     def command_name_for(klass)
       klass.to_s.
-        gsub(CommandRegistry::COMMAND_NAMESPACE.to_s+"::", "").
+        gsub(Commands::Registry::COMMAND_NAMESPACE.to_s+"::", "").
         gsub(/([A-Z])/, '-\1').
         split('-').
         reject(&:empty?).
