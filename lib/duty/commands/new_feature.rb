@@ -13,7 +13,7 @@ module Duty
 
       def usage
         <<-EOF
-Creates a new feature branch
+#{self.class.description}
 
 Usage: duty new-feature <name>
         EOF
