@@ -1,7 +1,10 @@
+require 'duty/commands/registry'
+
 module Duty
   class CLI
     def initialize(args)
       @args = args
+      boot_registry
     end
 
     def exec
@@ -10,6 +13,39 @@ module Duty
     end
 
     private
+
+    def boot_registry
+      @registry = Duty::Commands::Registry.new(additional_command_dir).tap {|r| r.require_all}
+    end
+
+    def additional_command_dir
+      if File.exists?(duty_file)
+        duty_config = File.read(duty_file)
+        command_dir_regexp = /commands:\s*(.*)/
+        command_dir = duty_config.match(command_dir_regexp)[1]
+        if Dir.exists?(command_dir)
+          command_dir 
+        else
+          error_message = <<-EOF
+Oops something went wrong!
+
+You defined `#{command_dir}` as an additional commands dir but this dir does not exist.
+Please check the `commands` section in your `.duty` file.
+          EOF
+
+          print error_message
+          exit -1
+        end
+      end
+    end
+
+    def duty_file
+      '.duty'
+    end
+
+    def registry
+      @registry
+    end
 
     def stdout(string)
       $stdout.puts string
@@ -21,7 +57,7 @@ module Duty
     end
 
     def usage
-      commands_description = Duty::Commands::Registry.all.map do |klass|
+      commands_description = registry.all.map do |klass|
         "  " + command_name_for(klass).ljust(20) + klass.description
       end.join("\n")
 

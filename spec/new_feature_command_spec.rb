@@ -1,5 +1,5 @@
 require "minitest/autorun"
-require 'duty'
+require 'duty/commands/new_feature'
 
 class NewFeatureCommandsSpec < MiniTest::Spec
   describe 'new-feature' do

@@ -1,37 +1,36 @@
 module Duty
   module Commands
-    module Registry
+    class Registry
       COMMAND_NAMESPACE = Duty::Commands
 
-      class << self
-        attr_accessor :commands
+      def initialize(additional_commands_dir = nil)
+        @core_commands_dir = __dir__
+        @additional_commands_dir = additional_commands_dir
+      end
 
-        def all
-          all_names = COMMAND_NAMESPACE.constants - [:Base]
-          all_names.reduce([]) do |commands, name|
-            command_class = COMMAND_NAMESPACE.const_get(name)
-            commands << command_class if command?(command_class)
-            commands
-          end
+      def all
+        command_names = COMMAND_NAMESPACE.constants - [:Base]
+        command_names.reduce([]) do |command_classes, command_name|
+          command_class = COMMAND_NAMESPACE.const_get(command_name)
+          command_classes << command_class if valid?(command_class)
+          command_classes
         end
+      end
 
-        def command?(command_class)
-          command_class.respond_to?(:superclass) &&
-          command_class.superclass == Duty::Commands::Base
-        end
+      def valid?(command_class)
+        command_class.respond_to?(:superclass) &&
+        command_class.superclass == Duty::Commands::Base
+      end
 
-        def require_all
-          Dir[command_files].each do |path|
-            require path.gsub(/(\.rb)$/, '')
-          end
-        end
+      def require_all
+        require_commands(@core_commands_dir)
+        require_commands(@additional_commands_dir) if @additional_commands_dir
+      end
 
-        def command_dir
-          __dir__
-        end
-
-        def command_files
-          File.expand_path(File.join(command_dir, "*.rb"))
+      def require_commands(dir)
+        command_files =File.expand_path(File.join(dir, "*.rb"))
+        Dir[command_files].each do |path|
+          require path.gsub(/(\.rb)$/, '')
         end
       end
     end
