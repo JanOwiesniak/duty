@@ -19,48 +19,19 @@ export PATH="$PATH:$HOME/path/to/duty/bin"
 ## Usage
 
 ```
+duty <command> [<args>]
+```
+
+## Core commands
+
+We already implemented some common use cases you might want to use.
+You get a list of all available commands by typing:
+
+```
 duty
 ```
 
-## Create new command
-
-* Create a new class in the `Duty::Commands` namespace
-* Put it into `lib/duty/commands/<your_command>.rb`
-* Require it from `lib/duty/commands.rb`
-
-Your new command will be immediately available from the CLI
-
-```
-duty <your-command>
-```
-
-### Example
-
-#### FooBar command
-
-`lib/duty/commands/foo_bar.rb`
-
-```
-module Duty
-  module Commands
-    class FooBar < Duty::Commands::Base
-    end
-  end
-end
-```
-
-#### CLI
-
-Fire up the CLI and execute your new command.
-Duty will tell you what you have to do next.
-
-```
-duty <your-command>
-```
-
-## Available commands
-
-### New feature
+### Create new feature
 
 * It checks out the `master` branch.
 * It creates a new feature branch called `feature/<name>`.
@@ -70,4 +41,48 @@ duty <your-command>
 
 ```
 duty new-feature <name>
+```
+
+## Extend duty with your own commands
+
+* Create a new `commands` dir
+* Create one or more duty command files in there
+* Create a .duty file e.g. in your home dir
+
+### How does a basic duty command looks like?
+
+path/to/your/new/commands/my_new_command.rb
+
+```ruby
+require 'duty/commands/base'
+
+module Duty
+  module Commands
+    class MyNewCommand < Duty::Commands::Base
+    end
+  end
+end
+```
+
+### How does a .duty file looks like?
+
+.duty
+
+```
+commands: /path/to/my/project/specific/commands
+```
+
+### How to use my own command?
+
+Your new command will be immediately available from the CLI.
+
+```
+duty
+```
+
+Fire up the CLI and execute your new command.
+Duty will tell you what you have to do next.
+
+```
+duty <your-command>
 ```
