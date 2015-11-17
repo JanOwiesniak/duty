@@ -1,14 +1,17 @@
 require 'duty/commands/registry'
+require 'duty/meta'
 
 module Duty
   class CLI
+    attr_reader :registry
+
     def initialize(args)
       @args = args
       boot_registry
     end
 
     def exec
-      stdout usage if missing_command?
+      stdout usage if needs_help?
       stdout execute_commands(@args)
     end
 
@@ -43,10 +46,6 @@ Please check the `commands` section in your `.duty` file.
       '.duty'
     end
 
-    def registry
-      @registry
-    end
-
     def stdout(string)
       $stdout.puts string
       exit 0
@@ -57,17 +56,11 @@ Please check the `commands` section in your `.duty` file.
     end
 
     def usage
-      msg = <<-EOF
-Usage: duty <command> [<args>]
-
-Commands:
-
-#{commands_with_description}
-      EOF
+      Duty::Meta::Help.new(self).to_s
     end
 
-    def missing_command?
-      @args.empty?
+    def needs_help?
+      @args.empty? || @args == %w(-h)
     end
 
     def execute_commands(args)
@@ -90,24 +83,8 @@ Commands:
       Object.const_get("Duty::Commands::#{command_class}")
     end
 
-    def command_name_for(klass)
-      klass.to_s.
-        gsub(Commands::Registry::COMMAND_NAMESPACE.to_s+"::", "").
-        gsub(/([A-Z])/, '-\1').
-        split('-').
-        reject(&:empty?).
-        map(&:downcase).
-        join('-')
-    end
-
     def command_to_class_name(string)
       string.split('-').collect(&:capitalize).join
-    end
-
-    def commands_with_description
-      registry.all.map do |klass|
-        "  " + command_name_for(klass).ljust(20) + klass.description
-      end.join("\n")
     end
 
     def invalid_command(args)
