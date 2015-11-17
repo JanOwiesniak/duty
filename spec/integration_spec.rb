@@ -2,42 +2,42 @@ require "minitest/autorun"
 require "open3"
 
 class IntegrationSpec < MiniTest::Spec
-  describe 'without a command' do
+  describe 'without a task' do
     it 'explains how to use the executable' do
-      assert_stdout /Usage: duty <command> \[<args>\]\s{1}/ do
+      assert_stdout /Usage: duty <task> \[<args>\]\s{1}/ do
         exec(duty)
       end
     end
 
-    it 'lists all available commands' do
-      assert_stdout /Commands:/ do
+    it 'lists all available tasks' do
+      assert_stdout /Tasks:/ do
         exec(duty)
       end
 
-      assert_stdout /test\s*This is a test command/ do
+      assert_stdout /test\s*This is a test task/ do
         exec(duty)
       end
     end
   end
 
-  describe 'with unknown command' do
-    it 'explains that the given command is invalid' do
-      assert_stdout /duty: `foo bar` is not a duty command\s{1}/ do
+  describe 'with unknown task' do
+    it 'explains that the given task is invalid' do
+      assert_stdout /duty: `foo bar` is not a duty task\s{1}/ do
         exec("#{duty} foo bar")
       end
     end
   end
 
-  describe 'with known command' do
+  describe 'with known task' do
     describe 'test' do
       describe 'invalid usage' do
-        it 'describes the command' do
-          assert_stdout /This is a test command\s{1}/ do
+        it 'describes the task' do
+          assert_stdout /This is a test task\s{1}/ do
             exec("#{duty} test")
           end
         end
 
-        it 'explains how to use the command' do
+        it 'explains how to use the task' do
           assert_stdout /Usage: duty test \[<args>\]\s{1}/ do
             exec("#{duty} test")
           end
@@ -52,7 +52,7 @@ class IntegrationSpec < MiniTest::Spec
         end
 
         describe 'on failure' do
-          it 'presents all executed commands with adds additional errors' do
+          it 'presents all executed tasks with adds additional errors' do
             assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `.*`, No such file or directory - this_wont_work/ do
               exec("#{duty} test fail")
             end
@@ -64,7 +64,7 @@ class IntegrationSpec < MiniTest::Spec
         end
 
         describe 'on success' do
-          it 'presents all executed commands' do
+          it 'presents all executed tasks' do
             assert_stdout /#{check_mark} Done something great\s{1}/ do
               exec("#{duty} test success")
             end
@@ -92,27 +92,27 @@ class IntegrationSpec < MiniTest::Spec
     "\u2715".encode('utf-8')
   end
 
-  def assert_stdout(expected, &command)
-    stdout, stderr, status = yield command
+  def assert_stdout(expected, &task)
+    stdout, stderr, status = yield task
     assert_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
     assert_equal true, status.success?, "Expected status to be 0 but got #{status}"
   end
 
-  def exec(*commands)
-    duty_config = "commands: #{__dir__}/support"
+  def exec(*tasks)
+    duty_config = "tasks: #{__dir__}/support"
     Dir.mktmpdir do |dir|
-      commands.each do |command|
-        @last_command = capture(command, :chdir => dir, :duty_config => duty_config)
+      tasks.each do |task|
+        @last_task = capture(task, :chdir => dir, :duty_config => duty_config)
       end
-      @last_command
+      @last_task
     end
   end
 
-  def capture(command, options = {})
+  def capture(task, options = {})
     if duty_config = options.delete(:duty_config)
       Open3.capture3("echo '#{duty_config}' > .duty", options)
     end
 
-    stdout, stderr, status = Open3.capture3(command, options)
+    stdout, stderr, status = Open3.capture3(task, options)
   end
 end

@@ -21,13 +21,13 @@ export PATH="$PATH:$HOME/path/to/duty/bin"
 ## Usage
 
 ```
-duty <command> [<args>]
+duty <task> [<args>]
 ```
 
-## Core commands
+## Core tasks
 
 We already implemented some common use cases you might want to use.
-You get a list of all available commands by typing:
+You get a list of all available tasks by typing:
 
 ```
 duty
@@ -45,22 +45,22 @@ duty
 duty new-feature <name>
 ```
 
-## Extend duty with your own commands
+## Extend duty with your own tasks
 
-* Create a new `commands` dir
+* Create a new `tasks` dir
 * Create one or more duty command files in there
 * Create a .duty file e.g. in your home dir
 
 ### How does a basic duty command looks like?
 
-path/to/your/new/commands/my_new_command.rb
+path/to/your/new/tasks/my_new_command.rb
 
 ```ruby
-require 'duty/commands/base'
+require 'duty/tasks/base'
 
 module Duty
-  module Commands
-    class MyNewCommand < Duty::Commands::Base
+  module Tasks
+    class MyNewCommand < Duty::Tasks::Base
     end
   end
 end
@@ -71,7 +71,7 @@ end
 .duty
 
 ```
-commands: /path/to/my/project/specific/commands
+tasks: /path/to/my/project/specific/tasks
 ```
 
 ### How to use my own command?

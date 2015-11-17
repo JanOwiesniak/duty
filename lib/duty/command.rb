@@ -1,5 +1,5 @@
 module Duty
-  # A command is an abstraction of something that has to be executed.
+  # A command is an abstraction of something that has to be executed by a Task.
   # The most common instance of this will be Shell commands.
   class Command
     attr_reader :cmd, :describe

@@ -1,12 +1,12 @@
 module Duty
-  module Commands
-    class Test < Duty::Commands::Base
+  module Tasks
+    class Test < Duty::Tasks::Base
       def initialize(*args)
         @given_arg = [args].flatten.first
       end
 
       def self.description
-        "This is a test command"
+        "This is a test task"
       end
 
       def usage

@@ -1,8 +1,8 @@
-require 'duty/commands/base'
+require 'duty/tasks/base'
 
 module Duty
-  module Commands
-    class NewFeature < Duty::Commands::Base
+  module Tasks
+    class NewFeature < Duty::Tasks::Base
       def self.description
         "Creates a new feature branch"
       end

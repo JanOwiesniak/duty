@@ -3,7 +3,7 @@ require 'duty/worker'
 require 'duty/command'
 
 module Duty
-  module Commands
+  module Tasks
     class Base
       def initialize(*args)
       end

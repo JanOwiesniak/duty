@@ -1,4 +1,4 @@
-require 'duty/commands/registry'
+require 'duty/tasks/registry'
 
 module Duty
   class CLI
@@ -15,18 +15,18 @@ module Duty
     private
 
     def load_registry
-      registry = Duty::Commands::Registry.new(additional_command_dir)
+      registry = Duty::Tasks::Registry.new(additional_task_dir)
       registry.require_all
       registry
     end
 
-    def additional_command_dir
+    def additional_task_dir
       if File.exists?(duty_file)
         duty_config = File.read(duty_file)
-        command_dir_regexp = /commands:\s*(.*)/
-        command_dir = duty_config.match(command_dir_regexp)[1]
-        if Dir.exists?(command_dir)
-          command_dir
+        task_dir_regexp = /tasks:\s*(.*)/
+        task_dir = duty_config.match(task_dir_regexp)[1]
+        if Dir.exists?(task_dir)
+          task_dir
         else
           error_message = <<-EOF
 Oops something went wrong!
@@ -60,11 +60,11 @@ Please check the `commands` section in your `.duty` file.
 
     def usage
       msg = <<-EOF
-Usage: duty <command> [<args>]
+Usage: duty <task> [<args>]
 
-Commands:
+Tasks:
 
-#{commands_with_description}
+#{tasks_with_description}
       EOF
     end
 
@@ -74,27 +74,27 @@ Commands:
 
     def execute_commands(args)
       begin
-        command = command_for(args)
+        task = task_for(args)
       rescue NameError => e
-        return invalid_command(args)
+        return invalid_task(args)
       end
 
-      present(command)
+      present(task)
     end
 
-    def command_for(args)
-      command_string, *rest = args
-      command_class_for(command_string).new(rest)
+    def task_for(args)
+      task_string, *rest = args
+      task_class_for(task_string).new(rest)
     end
 
-    def command_class_for(string)
-      command_class = command_to_class_name(string)
-      Object.const_get("Duty::Commands::#{command_class}")
+    def task_class_for(string)
+      task_class = task_to_class_name(string)
+      Object.const_get("Duty::Tasks::#{task_class}")
     end
 
-    def command_name_for(klass)
+    def task_name_for(klass)
       klass.to_s.
-        gsub(Commands::Registry::COMMAND_NAMESPACE.to_s+"::", "").
+        gsub(Tasks::Registry::COMMAND_NAMESPACE.to_s+"::", "").
         gsub(/([A-Z])/, '-\1').
         split('-').
         reject(&:empty?).
@@ -102,18 +102,18 @@ Commands:
         join('-')
     end
 
-    def command_to_class_name(string)
+    def task_to_class_name(string)
       string.split('-').collect(&:capitalize).join
     end
 
-    def commands_with_description
+    def tasks_with_description
       registry.all.map do |klass|
-        "  " + command_name_for(klass).ljust(20) + klass.description
+        "  " + task_name_for(klass).ljust(20) + klass.description
       end.join("\n")
     end
 
-    def invalid_command(args)
-      "duty: `#{args.join(' ')}` is not a duty command"
+    def invalid_task(args)
+      "duty: `#{args.join(' ')}` is not a duty task"
     end
 
     def present(command)

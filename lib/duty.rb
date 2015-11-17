@@ -1,5 +1,5 @@
 require 'duty/cli'
-require 'duty/commands'
+require 'duty/tasks'
 require 'duty/version'
 
 module Duty
