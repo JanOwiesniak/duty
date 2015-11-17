@@ -3,6 +3,8 @@ require 'yaml'
 
 module Duty
   class CLI
+    DUTY_CONFIG_FILENAME = '.duty.yml'
+
     def initialize(args)
       @args = args
       @registry = load_registry
@@ -22,8 +24,8 @@ module Duty
     end
 
     def additional_task_dir
-      if File.exists?(duty_file)
-        duty_config = load_config(duty_file)
+      if File.exists?(DUTY_CONFIG_FILENAME)
+        duty_config = load_config(DUTY_CONFIG_FILENAME)
         task_dir = duty_config["tasks"]
         if Dir.exists?(task_dir)
           task_dir
@@ -32,7 +34,7 @@ module Duty
 Oops something went wrong!
 
 You defined `#{command_dir}` as an additional commands dir but this dir does not exist.
-Please check the `commands` section in your `.duty` file.
+Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
           EOF
 
           print error_message
@@ -43,10 +45,6 @@ Please check the `commands` section in your `.duty` file.
 
     def load_config(filename)
       YAML.load(File.read(filename))
-    end
-
-    def duty_file
-      '.duty'
     end
 
     def registry

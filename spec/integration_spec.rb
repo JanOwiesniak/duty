@@ -84,6 +84,10 @@ class IntegrationSpec < MiniTest::Spec
     File.expand_path("../../bin/duty", __FILE__)
   end
 
+  def duty_file
+    '.duty.yml'
+  end
+
   def check_mark
     "\u2713".encode('utf-8')
   end
@@ -110,7 +114,7 @@ class IntegrationSpec < MiniTest::Spec
 
   def capture(task, options = {})
     if duty_config = options.delete(:duty_config)
-      Open3.capture3("echo '#{duty_config}' > .duty", options)
+      Open3.capture3("echo '#{duty_config}' > #{duty_file}", options)
     end
 
     stdout, stderr, status = Open3.capture3(task, options)
