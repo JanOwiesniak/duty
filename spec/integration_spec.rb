@@ -53,11 +53,10 @@ class IntegrationSpec < MiniTest::Spec
 
         describe 'on failure' do
           it 'presents all executed commands with adds additional errors' do
-            assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `\/tmp\/.*`, No such file or directory - this_wont_work/ do
+            assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `.*`, No such file or directory - this_wont_work/ do
               exec("#{duty} test fail")
             end
 
- 
             assert_stdout /#{check_mark} This was even greater\s{1}/ do
               exec("#{duty} test fail")
             end
