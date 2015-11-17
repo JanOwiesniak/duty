@@ -1,5 +1,5 @@
 require 'duty/system'
-require 'duty/worker'
+require 'duty/command_runner'
 require 'duty/command'
 
 module Duty
@@ -10,8 +10,8 @@ module Duty
 
       def call(system = Duty::System.new)
         @system = system
-        worker.execute if valid?
-        worker
+        command_runner.execute if valid?
+        command_runner
       end
 
       def self.description
@@ -32,9 +32,8 @@ usage: duty <your-command> <your-arguments>
 
       private
 
-      def worker
-        return @worker if @worker
-        @worker = Duty::Worker.new(commands)
+      def command_runner
+        @command_runner ||= Duty::Worker.new(commands)
       end
 
       def commands
