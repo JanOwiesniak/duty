@@ -1,4 +1,5 @@
 require 'duty/tasks/registry'
+require 'yaml'
 
 module Duty
   class CLI
@@ -22,9 +23,8 @@ module Duty
 
     def additional_task_dir
       if File.exists?(duty_file)
-        duty_config = File.read(duty_file)
-        task_dir_regexp = /tasks:\s*(.*)/
-        task_dir = duty_config.match(task_dir_regexp)[1]
+        duty_config = load_config(duty_file)
+        task_dir = duty_config["tasks"]
         if Dir.exists?(task_dir)
           task_dir
         else
@@ -39,6 +39,10 @@ Please check the `commands` section in your `.duty` file.
           exit -1
         end
       end
+    end
+
+    def load_config(filename)
+      YAML.load(File.read(filename))
     end
 
     def duty_file
