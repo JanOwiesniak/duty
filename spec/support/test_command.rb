@@ -24,13 +24,13 @@ Usage: duty test [<args>]
       def commands
         if @given_arg == 'success'
           [
-            command('pwd','Done something great'),
-            command('pwd','This was even greater')
+            shell('pwd','Done something great'),
+            shell('pwd','This was even greater')
           ]
         else
           [
-            command('this_wont_work','Done something great'),
-            command('pwd','This was even greater')
+            shell('this_wont_work','Done something great'),
+            shell('pwd','This was even greater')
           ]
         end
       end

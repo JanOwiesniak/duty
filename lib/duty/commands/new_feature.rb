@@ -27,9 +27,9 @@ Usage: duty new-feature <name>
 
       def commands
         [
-          command('git checkout master', 'Checkout `master` branch'),
-          command("git checkout -b 'feature/#{name}'", "Checkout `feature/#{name}` branch"),
-          command("git push -u origin 'feature/#{name}'", "Push `feature/#{name}` branch to `origin`")
+          shell('git checkout master', 'Checkout `master` branch'),
+          shell("git checkout -b 'feature/#{name}'", "Checkout `feature/#{name}` branch"),
+          shell("git push -u origin 'feature/#{name}'", "Push `feature/#{name}` branch to `origin`")
         ]
       end
 
