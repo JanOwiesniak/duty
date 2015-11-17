@@ -1,11 +1,11 @@
 require 'duty/commands/registry'
 require 'duty/meta'
-require 'duty/tasks/registry'
 require 'yaml'
 
 module Duty
   class CLI
     attr_reader :registry
+    DUTY_CONFIG_FILENAME = '.duty.yml'
 
     def initialize(args)
       @args = args
@@ -25,17 +25,17 @@ module Duty
     end
 
     def additional_command_dir
-      if File.exists?(duty_file)
-        duty_config = load_config(duty_file)
-        task_dir = duty_config["tasks"]
-        if Dir.exists?(task_dir)
-          task_dir
+      if File.exists?(DUTY_CONFIG_FILENAME)
+        duty_config = load_config(DUTY_CONFIG_FILENAME)
+        command_dir = duty_config["commands"]
+        if Dir.exists?(command_dir)
+          command_dir
         else
           error_message = <<-EOF
 Oops something went wrong!
 
 You defined `#{command_dir}` as an additional commands dir but this dir does not exist.
-Please check the `commands` section in your `.duty` file.
+Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
           EOF
 
           print error_message
@@ -46,10 +46,6 @@ Please check the `commands` section in your `.duty` file.
 
     def load_config(filename)
       YAML.load(File.read(filename))
-    end
-
-    def duty_file
-      '.duty'
     end
 
     def stdout(string)
