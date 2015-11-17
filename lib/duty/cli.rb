@@ -1,5 +1,7 @@
 require 'duty/commands/registry'
 require 'duty/meta'
+require 'duty/tasks/registry'
+require 'yaml'
 
 module Duty
   class CLI
@@ -24,11 +26,10 @@ module Duty
 
     def additional_command_dir
       if File.exists?(duty_file)
-        duty_config = File.read(duty_file)
-        command_dir_regexp = /commands:\s*(.*)/
-        command_dir = duty_config.match(command_dir_regexp)[1]
-        if Dir.exists?(command_dir)
-          command_dir
+        duty_config = load_config(duty_file)
+        task_dir = duty_config["tasks"]
+        if Dir.exists?(task_dir)
+          task_dir
         else
           error_message = <<-EOF
 Oops something went wrong!
@@ -41,6 +42,10 @@ Please check the `commands` section in your `.duty` file.
           exit -1
         end
       end
+    end
+
+    def load_config(filename)
+      YAML.load(File.read(filename))
     end
 
     def duty_file
