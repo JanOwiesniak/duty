@@ -4,7 +4,7 @@ module Duty
   class CLI
     def initialize(args)
       @args = args
-      boot_registry
+      @registry = load_registry
     end
 
     def exec
@@ -14,8 +14,10 @@ module Duty
 
     private
 
-    def boot_registry
-      @registry = Duty::Commands::Registry.new(additional_command_dir).tap {|r| r.require_all}
+    def load_registry
+      registry = Duty::Commands::Registry.new(additional_command_dir)
+      registry.require_all
+      registry
     end
 
     def additional_command_dir
