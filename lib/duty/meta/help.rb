@@ -28,19 +28,10 @@ module Duty
       end
 
       def commands_with_description
+        humanizer = Humanizer.new
         registry.all.map do |klass|
-          "  " + command_name_for(klass).ljust(20) + klass.description
+          "  " + humanizer.command(klass).ljust(20) + klass.description
         end.join("\n")
-      end
-
-      def command_name_for(klass)
-        klass.to_s.
-          gsub("#{Commands::Registry::COMMAND_NAMESPACE}::", '').
-          gsub(/([A-Z])/, '-\1').
-          split('-').
-          reject(&:empty?).
-          map(&:downcase).
-          join('-')
       end
     end
   end

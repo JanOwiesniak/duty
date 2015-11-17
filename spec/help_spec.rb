@@ -1,9 +1,9 @@
 require "minitest/autorun"
-require "duty/meta/help"
+require "duty/meta"
 
 class MetaHelpSpec < MiniTest::Spec
   describe "help" do
-    let(:subject) { Duty::Meta::Help.new(fake_cli) }
+    subject { Duty::Meta::Help.new(fake_cli) }
 
     it "returns information about all commands" do
       expected = /Usage:.*\s+Commands:\s+command-a\s+Some description/
