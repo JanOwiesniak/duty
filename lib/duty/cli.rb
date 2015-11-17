@@ -12,6 +12,7 @@ module Duty
 
     def exec
       stdout usage if needs_help?
+      stdout completion if needs_completion?
       stdout execute_commands(@args)
     end
 
@@ -60,7 +61,15 @@ Please check the `commands` section in your `.duty` file.
     end
 
     def needs_help?
-      @args.empty? || @args == %w(-h)
+      @args.empty? || @args == %w(-h) || @args == %w(--help)
+    end
+
+    def completion
+      Duty::Meta::Completion.new(self, @args.drop(1)).to_s
+    end
+
+    def needs_completion?
+      @args.first == '--cmplt'
     end
 
     def execute_commands(args)
