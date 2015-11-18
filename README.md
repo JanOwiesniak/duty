@@ -18,6 +18,16 @@ not published on rubygems.org yet
 export PATH="$PATH:$HOME/path/to/duty/bin"
 ```
 
+## Add shell completion
+
+This gem supports a simple shell completion for
+[Bash](https://www.gnu.org/software/bash/) and [ZSH](http://www.zsh.org).
+To enable this feature load the completion functions:
+
+```
+source duty.completion
+```
+
 ## Usage
 
 ```

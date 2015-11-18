@@ -28,6 +28,20 @@ class IntegrationSpec < MiniTest::Spec
     end
   end
 
+  describe 'with --cmplt for shell completion' do
+    it 'returns all commands without input' do
+      assert_stdout /start-feature\stest/ do
+        exec("#{duty} --cmplt")
+      end
+    end
+
+    it 'returns matching commands with input' do
+      assert_stdout /test/ do
+        exec("#{duty} --cmplt t")
+      end
+    end
+  end
+
   describe 'with known command' do
     describe 'test' do
       describe 'invalid usage' do
