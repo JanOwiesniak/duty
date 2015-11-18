@@ -33,6 +33,18 @@ You get a list of all available commands by typing:
 duty
 ```
 
+## Naming conventions
+
+Task names should be a combination of one verb joined with one or more nouns.
+
+Examples:
+
+* `start-feature`
+* `continue-feature`
+* `create-pull-request`
+* `accept-pull-request`
+* `reject-pull-request`
+
 ### Start a new feature
 
 * It checks out the `master` branch.
