@@ -15,7 +15,7 @@ module Duty
         <<-EOF
 #{self.class.description}
 
-Usage: duty new-feature <name>
+Usage: duty start-feature <name>
         EOF
       end
 

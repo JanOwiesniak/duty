@@ -2,14 +2,14 @@ require "minitest/autorun"
 require 'duty/commands/start_feature'
 
 class StartFeatureCommandsSpec < MiniTest::Spec
-  describe 'new-feature' do
+  describe 'start-feature' do
     it 'is valid with a given branch name' do
       refute Duty::Commands::StartFeature.new.valid?
       assert Duty::Commands::StartFeature.new('branch-name').valid?
     end
 
     it 'knows how it should be used' do
-      expected = /Creates a new feature branch\s*Usage: duty new-feature <name>/
+      expected = /Creates a new feature branch\s*Usage: duty start-feature <name>/
       explanation = Duty::Commands::StartFeature.new.usage
       assert_match expected, explanation
     end
