@@ -1,7 +1,7 @@
 module Duty
-  module Commands
+  module Tasks
     class Registry
-      COMMAND_NAMESPACE = Duty::Commands
+      COMMAND_NAMESPACE = Duty::Tasks
 
       def initialize(additional_commands_dir = nil)
         @core_commands_dir = __dir__
@@ -19,7 +19,7 @@ module Duty
 
       def valid?(command_class)
         command_class.respond_to?(:superclass) &&
-        command_class.superclass == Duty::Commands::Base
+        command_class.superclass == Duty::Tasks::Base
       end
 
       def require_all

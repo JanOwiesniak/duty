@@ -1,23 +1,15 @@
 module Duty
+  # A command is an abstraction of something that has to be executed by a Task.
+  # The most common instance of this will be Shell commands.
   class Command
-    def initialize(cmd, desciption, system)
+    attr_reader :cmd, :describe
+
+    def initialize(cmd, description, system)
       @cmd = cmd
-      @desciption = desciption
+      @describe = description
       @system = system
       @executed = false
       @error = nil
-    end
-
-    def cmd
-      @cmd
-    end
-
-    def pwd
-      Dir.pwd
-    end
-
-    def describe
-      @desciption
     end
 
     def executed?
@@ -37,9 +29,19 @@ module Duty
     end
 
     def execute
-      @executed = true
-      stdout, stderr, status = @system.call(@cmd)
-      @error = stderr if status != 0
+      raise NotImplementedError
+    end
+
+    class Shell < self
+      def pwd
+        Dir.pwd
+      end
+
+      def execute
+        @executed = true
+        stdout, stderr, status = @system.call(@cmd)
+        @error = stderr if status != 0
+      end
     end
   end
 end

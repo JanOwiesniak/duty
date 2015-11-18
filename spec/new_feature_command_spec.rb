@@ -1,23 +1,23 @@
 require "minitest/autorun"
-require 'duty/commands/new_feature'
+require 'duty/tasks/new_feature'
 
-class NewFeatureCommandsSpec < MiniTest::Spec
+class NewFeatureTasksSpec < MiniTest::Spec
   describe 'new-feature' do
     it 'is valid with a given branch name' do
-      refute Duty::Commands::NewFeature.new.valid?
-      assert Duty::Commands::NewFeature.new('branch-name').valid?
+      refute Duty::Tasks::NewFeature.new.valid?
+      assert Duty::Tasks::NewFeature.new('branch-name').valid?
     end
 
     it 'knows how it should be used' do
       expected = /Creates a new feature branch\s*Usage: duty new-feature <name>/
-      explanation = Duty::Commands::NewFeature.new.usage
+      explanation = Duty::Tasks::NewFeature.new.usage
       assert_match expected, explanation
     end
 
     describe 'without name' do
-      it 'does not execute any commands' do
+      it 'does not execute any tasks' do
         system = fake_system
-        executer = Duty::Commands::NewFeature.new.call(system)
+        executer = Duty::Tasks::NewFeature.new.call(system)
         assert_equal [], system.calls
         assert_equal [], executer.executed
       end
@@ -25,9 +25,9 @@ class NewFeatureCommandsSpec < MiniTest::Spec
 
     describe 'with name' do
       describe 'on success system' do
-        it 'successfully executes all 3 commands in a row' do
+        it 'successfully executes all 3 tasks in a row' do
           system = success_system
-          executer = Duty::Commands::NewFeature.new('awesome').call(system)
+          executer = Duty::Tasks::NewFeature.new('awesome').call(system)
 
           assert_equal 3, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
@@ -43,9 +43,9 @@ class NewFeatureCommandsSpec < MiniTest::Spec
       end
 
       describe 'on fail system' do
-        it 'executes all 3 commands in a row and knows what went wrong' do
+        it 'executes all 3 tasks in a row and knows what went wrong' do
           system = fail_system
-          executer = Duty::Commands::NewFeature.new('awesome').call(system)
+          executer = Duty::Tasks::NewFeature.new('awesome').call(system)
 
           assert_equal 3, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
@@ -60,11 +60,11 @@ class NewFeatureCommandsSpec < MiniTest::Spec
         end
       end
 
-      describe 'commands' do
+      describe 'tasks' do
         describe 'checkout `master` branch' do
           it 'successfully checks out the `master` branch' do
             system = success_system
-            executer = Duty::Commands::NewFeature.new('awesome').call(system)
+            executer = Duty::Tasks::NewFeature.new('awesome').call(system)
 
             command = executer.executed[0]
             assert_equal 'git checkout master', command.cmd
@@ -76,7 +76,7 @@ class NewFeatureCommandsSpec < MiniTest::Spec
         describe 'create feature branch' do
           it 'successfully checks out the new feature branch' do
             system = success_system
-            executer = Duty::Commands::NewFeature.new('awesome').call(system)
+            executer = Duty::Tasks::NewFeature.new('awesome').call(system)
 
             command = executer.executed[1]
             assert_equal "git checkout -b 'feature/awesome'", command.cmd
@@ -88,7 +88,7 @@ class NewFeatureCommandsSpec < MiniTest::Spec
         describe 'push feature branch to origin' do
           it 'successfully pushs the new feature branch to origin' do
             system = success_system
-            executer = Duty::Commands::NewFeature.new('awesome').call(system)
+            executer = Duty::Tasks::NewFeature.new('awesome').call(system)
 
             command = executer.executed[2]
             assert_equal "git push -u origin 'feature/awesome'", command.cmd

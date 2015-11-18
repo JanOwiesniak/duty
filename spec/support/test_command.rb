@@ -1,12 +1,12 @@
 module Duty
-  module Commands
-    class Test < Duty::Commands::Base
+  module Tasks
+    class Test < Duty::Tasks::Base
       def initialize(*args)
         @given_arg = [args].flatten.first
       end
 
       def self.description
-        "This is a test command"
+        "This is a test task"
       end
 
       def usage
@@ -24,13 +24,13 @@ Usage: duty test [<args>]
       def commands
         if @given_arg == 'success'
           [
-            command('pwd','Done something great'),
-            command('pwd','This was even greater')
+            shell('pwd','Done something great'),
+            shell('pwd','This was even greater')
           ]
         else
           [
-            command('this_wont_work','Done something great'),
-            command('pwd','This was even greater')
+            shell('this_wont_work','Done something great'),
+            shell('pwd','This was even greater')
           ]
         end
       end

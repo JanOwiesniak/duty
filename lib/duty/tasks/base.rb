@@ -1,17 +1,17 @@
 require 'duty/system'
-require 'duty/worker'
+require 'duty/command_runner'
 require 'duty/command'
 
 module Duty
-  module Commands
+  module Tasks
     class Base
       def initialize(*args)
       end
 
       def call(system = Duty::System.new)
         @system = system
-        worker.execute if valid?
-        worker
+        command_runner.execute if valid?
+        command_runner
       end
 
       def self.description
@@ -32,9 +32,8 @@ usage: duty <your-command> <your-arguments>
 
       private
 
-      def worker
-        return @worker if @worker
-        @worker = Duty::Worker.new(commands)
+      def command_runner
+        @command_runner ||= Duty::Worker.new(commands)
       end
 
       def commands
@@ -44,14 +43,14 @@ usage: duty <your-command> <your-arguments>
       end
 
       def how_to_command
-        command(
+        shell(
           'a_failing_command',
           'You have no commands defined yet. Define commands by overwriting the `commands` method in your command class. This method must contain a collection of `commands`. Use the `command` helper method to build a command. A command consists of two elements. First element is the shell command that should be executed. Second element is the description that will be presented in the CLI',
         )
       end
 
-      def command(cmd, description)
-        Duty::Command.new(cmd, description, @system)
+      def shell(cmd, description)
+        Duty::Command::Shell.new(cmd, description, @system)
       end
     end
   end

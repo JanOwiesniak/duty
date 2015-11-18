@@ -1,4 +1,4 @@
 module Duty
-  module Commands
+  module Tasks
   end
 end
