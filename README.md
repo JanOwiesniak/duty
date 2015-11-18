@@ -88,3 +88,10 @@ Duty will tell you what you have to do next.
 ```
 duty <your-command>
 ```
+
+## Contributing
+
+1. [Fork](http://github.com/JanOwiesniak/duty/fork)
+2. Add executable to your $PATH
+3. Create new feature branch (`duty new-feature <my-awesome-feature>`)
+4. Create new pull request
