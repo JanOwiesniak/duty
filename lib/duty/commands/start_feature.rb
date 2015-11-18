@@ -2,7 +2,7 @@ require 'duty/commands/base'
 
 module Duty
   module Commands
-    class NewFeature < Duty::Commands::Base
+    class StartFeature < Duty::Commands::Base
       def self.description
         "Creates a new feature branch"
       end

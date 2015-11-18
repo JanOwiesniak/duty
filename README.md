@@ -33,7 +33,7 @@ You get a list of all available commands by typing:
 duty
 ```
 
-### Create new feature
+### Start a new feature
 
 * It checks out the `master` branch.
 * It creates a new feature branch called `feature/<name>`.
@@ -42,7 +42,7 @@ duty
 * It pushs the new feature branch to origin.
 
 ```
-duty new-feature <name>
+duty start-feature <name>
 ```
 
 ## Extend duty with your own commands
@@ -93,5 +93,5 @@ duty <your-command>
 
 1. [Fork](http://github.com/JanOwiesniak/duty/fork)
 2. Add executable to your $PATH
-3. Create new feature branch (`duty new-feature <my-awesome-feature>`)
+3. Create new feature branch (`duty start-feature <my-awesome-feature>`)
 4. Create new pull request
