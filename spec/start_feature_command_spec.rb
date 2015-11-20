@@ -43,20 +43,29 @@ class StartFeatureCommandsSpec < MiniTest::Spec
       end
 
       describe 'on fail system' do
-        it 'executes all 3 commands in a row and knows what went wrong' do
+        it 'stops execution as soon as first command failed' do
           system = fail_system
           executer = Duty::Commands::StartFeature.new('awesome').call(system)
 
-          assert_equal 3, system.calls.size
-          assert_equal 'git checkout master', system.calls[0]
-          assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
-          assert_equal "git push -u origin 'feature/awesome'", system.calls[2]
+          assert_equal 3, executer.executed.size
 
-          executer.executed.each do |command|
-            assert_equal true, command.executed?
-            assert_equal true, command.error?, command.error
-            assert_equal 'something went wrong', command.error
-          end
+          command = executer.executed[0]
+          assert_equal true, command.executed?
+          assert_equal true, command.error?
+          assert_equal 'something went wrong', command.error
+
+          command = executer.executed[1]
+          assert_equal false, command.executed?
+          assert_equal true, command.error?
+          assert_equal 'Stopped execution because something went wrong in a previous command', command.error
+
+          command = executer.executed[2]
+          assert_equal false, command.executed?
+          assert_equal true, command.error?
+          assert_equal 'Stopped execution because something went wrong in a previous command', command.error
+
+          assert_equal 1, system.calls.size
+          assert_equal 'git checkout master', system.calls[0]
         end
       end
 

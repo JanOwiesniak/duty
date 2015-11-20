@@ -30,7 +30,7 @@ module Duty
 
     def error
       if @executed == false
-        'Not executed'
+        'Stopped execution because something went wrong in a previous command'
       else
         @error
       end

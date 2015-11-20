@@ -161,7 +161,8 @@ What just happend:
         end
 
         def error(command)
-          " | Executed `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
+          status = command.executed? ? "Executed" : "Not Executed"
+          " | #{status} `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
         end
 
         def cross_mark

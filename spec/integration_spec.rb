@@ -71,7 +71,7 @@ class IntegrationSpec < MiniTest::Spec
               exec("#{duty} test fail")
             end
 
-            assert_stdout /#{check_mark} This was even greater\s{1}/ do
+            assert_stdout /#{cross_mark} This was even greater \| Not Executed `pwd` in `.*`, Stopped execution because something went wrong in a previous command/ do
               exec("#{duty} test fail")
             end
           end
