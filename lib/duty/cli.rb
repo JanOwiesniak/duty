@@ -53,10 +53,6 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
       exit 0
     end
 
-    def strip(string)
-      string.gsub(/ +/, " ").gsub(/^ +/, "")
-    end
-
     def usage
       Duty::Meta::Help.new(self).to_s
     end
