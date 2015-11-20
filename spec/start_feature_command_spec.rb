@@ -17,9 +17,9 @@ class StartFeatureCommandsSpec < MiniTest::Spec
     describe 'without name' do
       it 'does not execute any commands' do
         system = fake_system
-        executer = Duty::Commands::StartFeature.new.call(system)
+        worker = Duty::Commands::StartFeature.new.call(system)
         assert_equal [], system.calls
-        assert_equal [], executer.processed
+        assert_equal [], worker.processed
       end
     end
 
@@ -27,14 +27,14 @@ class StartFeatureCommandsSpec < MiniTest::Spec
       describe 'on success system' do
         it 'successfully executes all 3 commands in a row' do
           system = success_system
-          executer = Duty::Commands::StartFeature.new('awesome').call(system)
+          worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
           assert_equal 3, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
           assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
           assert_equal "git push -u origin 'feature/awesome'", system.calls[2]
 
-          executer.processed.each do |command|
+          worker.processed.each do |command|
             assert_equal true, command.executed?
             assert_equal false, command.error?, command.error
             assert_equal nil, command.error
@@ -45,21 +45,21 @@ class StartFeatureCommandsSpec < MiniTest::Spec
       describe 'on fail system' do
         it 'stops execution as soon as first command failed' do
           system = fail_system
-          executer = Duty::Commands::StartFeature.new('awesome').call(system)
+          worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-          assert_equal 3, executer.processed.size
+          assert_equal 3, worker.processed.size
 
-          command = executer.processed[0]
+          command = worker.processed[0]
           assert_equal true, command.executed?
           assert_equal true, command.error?
           assert_equal 'something went wrong', command.error
 
-          command = executer.processed[1]
+          command = worker.processed[1]
           assert_equal false, command.executed?
           assert_equal true, command.error?
           assert_equal 'Stopped execution because something went wrong in a previous command', command.error
 
-          command = executer.processed[2]
+          command = worker.processed[2]
           assert_equal false, command.executed?
           assert_equal true, command.error?
           assert_equal 'Stopped execution because something went wrong in a previous command', command.error
@@ -73,9 +73,9 @@ class StartFeatureCommandsSpec < MiniTest::Spec
         describe 'checkout `master` branch' do
           it 'successfully checks out the `master` branch' do
             system = success_system
-            executer = Duty::Commands::StartFeature.new('awesome').call(system)
+            worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = executer.processed[0]
+            command = worker.processed[0]
             assert_equal 'git checkout master', command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Checkout `master` branch', command.describe
@@ -85,9 +85,9 @@ class StartFeatureCommandsSpec < MiniTest::Spec
         describe 'create feature branch' do
           it 'successfully checks out the new feature branch' do
             system = success_system
-            executer = Duty::Commands::StartFeature.new('awesome').call(system)
+            worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = executer.processed[1]
+            command = worker.processed[1]
             assert_equal "git checkout -b 'feature/awesome'", command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Checkout `feature/awesome` branch', command.describe
@@ -97,9 +97,9 @@ class StartFeatureCommandsSpec < MiniTest::Spec
         describe 'push feature branch to origin' do
           it 'successfully pushs the new feature branch to origin' do
             system = success_system
-            executer = Duty::Commands::StartFeature.new('awesome').call(system)
+            worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = executer.processed[2]
+            command = worker.processed[2]
             assert_equal "git push -u origin 'feature/awesome'", command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Push `feature/awesome` branch to `origin`', command.describe

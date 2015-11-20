@@ -115,8 +115,8 @@ Please check the `commands` section in your `.duty` file.
 
       def present
         if command.valid?
-          executor = command.call
-          summary = Summary.new(executor)
+          worker = command.call
+          summary = Summary.new(worker)
           summary.to_s
         else
           command.usage
@@ -130,8 +130,8 @@ Please check the `commands` section in your `.duty` file.
       end
 
       class Summary
-        def initialize(executor)
-          @executor = executor
+        def initialize(worker)
+          @worker = worker
         end
 
         def to_s
@@ -145,7 +145,7 @@ What just happend:
         private
 
         def formatted
-          commands = @executor.processed.map do |command|
+          commands = @worker.processed.map do |command|
             describe(command)
           end.join("\n")
         end
