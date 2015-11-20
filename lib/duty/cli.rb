@@ -145,7 +145,7 @@ What just happend:
         private
 
         def formatted
-          commands = @executor.executed.map do |command|
+          commands = @executor.processed.map do |command|
             describe(command)
           end.join("\n")
         end
