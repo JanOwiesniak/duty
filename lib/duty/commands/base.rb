@@ -22,7 +22,7 @@ module Duty
         <<-EOF
 TODO: Describe how your command should be used by overwriting the `usage` method in your command class
 
-usage: duty <your-command> <your-arguments>
+Usage: duty <your-command> <your-arguments>
         EOF
       end
 
