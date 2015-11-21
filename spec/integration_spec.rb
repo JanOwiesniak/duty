@@ -59,12 +59,6 @@ class IntegrationSpec < MiniTest::Spec
       end
 
       describe 'valid usage' do
-        it 'explains what just happend' do
-          assert_stdout /What just happend:\s{2}/ do
-            exec("#{duty} test args")
-          end
-        end
-
         describe 'on failure' do
           it 'presents all processed commands with adds additional errors' do
             assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `.*`, No such file or directory - this_wont_work/ do

@@ -132,11 +132,7 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
         end
 
         def to_s
-          <<-EOF
-What just happend:
-
-#{formatted}
-          EOF
+          formatted
         end
 
         private
