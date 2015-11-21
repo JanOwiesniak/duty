@@ -19,7 +19,7 @@ class StartFeatureCommandsSpec < MiniTest::Spec
         system = fake_system
         worker = Duty::Commands::StartFeature.new.call(system)
         assert_equal [], system.calls
-        assert_equal [], worker.processed
+        assert_equal [], worker.executed
       end
     end
 
@@ -34,7 +34,7 @@ class StartFeatureCommandsSpec < MiniTest::Spec
           assert_equal "git checkout -b 'feature/awesome'", system.calls[1]
           assert_equal "git push -u origin 'feature/awesome'", system.calls[2]
 
-          worker.processed.each do |command|
+          worker.executed.each do |command|
             assert_equal true, command.executed?
             assert_equal false, command.error?, command.error
             assert_equal nil, command.error
@@ -47,22 +47,12 @@ class StartFeatureCommandsSpec < MiniTest::Spec
           system = fail_system
           worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-          assert_equal 3, worker.processed.size
+          assert_equal 1, worker.executed.size
 
-          command = worker.processed[0]
+          command = worker.executed[0]
           assert_equal true, command.executed?
           assert_equal true, command.error?
           assert_equal 'something went wrong', command.error
-
-          command = worker.processed[1]
-          assert_equal false, command.executed?
-          assert_equal true, command.error?
-          assert_equal 'Stopped execution because something went wrong in a previous command', command.error
-
-          command = worker.processed[2]
-          assert_equal false, command.executed?
-          assert_equal true, command.error?
-          assert_equal 'Stopped execution because something went wrong in a previous command', command.error
 
           assert_equal 1, system.calls.size
           assert_equal 'git checkout master', system.calls[0]
@@ -75,7 +65,7 @@ class StartFeatureCommandsSpec < MiniTest::Spec
             system = success_system
             worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = worker.processed[0]
+            command = worker.executed[0]
             assert_equal 'git checkout master', command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Checkout `master` branch', command.describe
@@ -87,7 +77,7 @@ class StartFeatureCommandsSpec < MiniTest::Spec
             system = success_system
             worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = worker.processed[1]
+            command = worker.executed[1]
             assert_equal "git checkout -b 'feature/awesome'", command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Checkout `feature/awesome` branch', command.describe
@@ -99,7 +89,7 @@ class StartFeatureCommandsSpec < MiniTest::Spec
             system = success_system
             worker = Duty::Commands::StartFeature.new('awesome').call(system)
 
-            command = worker.processed[2]
+            command = worker.executed[2]
             assert_equal "git push -u origin 'feature/awesome'", command.cmd
             assert_match /duty/, command.pwd
             assert_equal 'Push `feature/awesome` branch to `origin`', command.describe

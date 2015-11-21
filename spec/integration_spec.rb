@@ -59,26 +59,28 @@ class IntegrationSpec < MiniTest::Spec
       end
 
       describe 'valid usage' do
-        describe 'on failure' do
-          it 'presents all processed commands with adds additional errors' do
-            assert_stdout /#{cross_mark} Done something great \| Executed `this_wont_work` in `.*`, No such file or directory - this_wont_work/ do
-              exec("#{duty} test fail")
+        describe 'on success' do
+          it 'displays all executed commands' do
+            assert_stdout /#{check_mark} Done something great/ do
+              exec("#{duty} test success")
             end
 
-            assert_stdout /#{cross_mark} This was even greater \| Not Executed `pwd` in `.*`, Stopped execution because something went wrong in a previous command/ do
-              exec("#{duty} test fail")
+            assert_stdout /#{check_mark} This was even greater/ do
+              exec("#{duty} test success")
             end
           end
         end
 
-        describe 'on success' do
-          it 'presents all processed commands' do
-            assert_stdout /#{check_mark} Done something great\s{1}/ do
-              exec("#{duty} test success")
+        describe 'on failure' do
+          it 'displays executed commands' do
+            assert_stdout /#{cross_mark} Done something great/ do
+              exec("#{duty} test fail")
             end
+          end
 
-            assert_stdout /#{check_mark} This was even greater\s{1}/ do
-              exec("#{duty} test success")
+          it 'does not display not executed commands' do
+            refute_stdout /This was even greater/ do
+              exec("#{duty} test fail")
             end
           end
         end
@@ -108,6 +110,11 @@ class IntegrationSpec < MiniTest::Spec
     stdout, stderr, status = yield command
     assert_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
     assert_equal true, status.success?, "Expected status to be 0 but got #{status}"
+  end
+
+  def refute_stdout(expected, &command)
+    stdout, stderr, status = yield command
+    refute_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
   end
 
   def exec(*commands)

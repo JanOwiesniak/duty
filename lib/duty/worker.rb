@@ -2,19 +2,19 @@ module Duty
   class Worker
     def initialize(commands)
       @commands = commands
-      @processed = []
+      @executed = []
     end
 
     def execute
       @commands.each.with_index do |command, index|
-        @processed << command
         next if previous_command_error?(index)
         command.execute
+        @executed << command
       end
     end
 
-    def processed
-      @processed
+    def executed
+      @executed
     end
 
     private

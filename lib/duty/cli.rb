@@ -138,24 +138,13 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
         private
 
         def formatted
-          commands = @worker.processed.map do |command|
-            describe(command)
+          commands = @worker.executed.map do |command|
+            "#{state(command)} #{command.describe}"
           end.join("\n")
-        end
-
-        def describe(command)
-          "#{state(command)} #{command.describe}".tap do |s|
-            s << error(command) if command.error?
-          end
         end
 
         def state(command)
           command.error? ? cross_mark : check_mark
-        end
-
-        def error(command)
-          status = command.executed? ? "Executed" : "Not Executed"
-          " | #{status} `#{command.cmd}` in `#{command.pwd}`, #{command.error}"
         end
 
         def cross_mark
