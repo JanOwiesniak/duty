@@ -1,4 +1,4 @@
-require 'duty/commands/registry'
+require 'duty/tasks/registry'
 
 module Duty
   module Meta
@@ -19,18 +19,18 @@ module Duty
 
       def usage
         msg = <<-EOF
-  Usage: duty <command> [<args>]
+  Usage: duty <task> [<args>]
 
-  Commands:
+  Tasks:
 
-  #{commands_with_description}
+  #{tasks_with_description}
         EOF
       end
 
-      def commands_with_description
+      def tasks_with_description
         humanizer = Humanizer.new
         registry.all.map do |klass|
-          "  " + humanizer.command(klass).ljust(20) + klass.description
+          "  " + humanizer.task(klass).ljust(20) + klass.description
         end.join("\n")
       end
     end

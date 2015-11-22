@@ -31,13 +31,13 @@ source duty.completion
 ## Usage
 
 ```
-duty <command> [<args>]
+duty <task> [<args>]
 ```
 
-## Core commands
+## Core tasks
 
 We already implemented some common use cases you might want to use.
-You get a list of all available commands by typing:
+You get a list of all available tasks by typing:
 
 ```
 duty
@@ -67,22 +67,22 @@ Examples:
 duty start-feature <name>
 ```
 
-## Extend duty with your own commands
+## Extend duty with your own tasks
 
-* Create a new `commands` dir
-* Create one or more duty command files in there
+* Create a new `tasks` dir
+* Create one or more duty task files in there
 * Create a .duty file e.g. in your home dir
 
-### How does a basic duty command looks like?
+### How does a basic duty task looks like?
 
-path/to/your/new/commands/my_new_command.rb
+path/to/your/new/tasks/my_new_task.rb
 
 ```ruby
-require 'duty/commands/base'
+require 'duty/tasks/base'
 
 module Duty
-  module Commands
-    class MyNewCommand < Duty::Commands::Base
+  module Tasks
+    class MyNewTask < Duty::Tasks::Base
     end
   end
 end
@@ -93,22 +93,22 @@ end
 .duty
 
 ```
-commands: /path/to/my/project/specific/commands
+tasks: /path/to/my/project/specific/tasks
 ```
 
-### How to use my own command?
+### How to use my own task?
 
-Your new command will be immediately available from the CLI.
+Your new task will be immediately available from the CLI.
 
 ```
 duty
 ```
 
-Fire up the CLI and execute your new command.
+Fire up the CLI and execute your new task.
 Duty will tell you what you have to do next.
 
 ```
-duty <your-command>
+duty <your-task>
 ```
 
 ## Contributing

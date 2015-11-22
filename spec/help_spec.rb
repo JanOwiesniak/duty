@@ -5,8 +5,8 @@ class MetaHelpSpec < MiniTest::Spec
   describe "help" do
     subject { Duty::Meta::Help.new(fake_cli) }
 
-    it "returns information about all commands" do
-      expected = /Usage:.*\s+Commands:\s+command-a\s+Some description/
+    it "returns information about all tasks" do
+      expected = /Usage:.*\s+Tasks:\s+task-a\s+Some description/
       assert_match expected, subject.to_s
     end
   end
@@ -19,19 +19,19 @@ class MetaHelpSpec < MiniTest::Spec
 
   def fake_registry
     FakeRegistry.new([
-      fake_command("CommandA", "Some description"),
+      fake_task("TaskA", "Some description"),
     ])
   end
 
-  def fake_command(*args)
-    FakeCommand.new(*args)
+  def fake_task(*args)
+    FakeTask.new(*args)
   end
 
   FakeCli = Struct.new(:registry)
   FakeRegistry = Struct.new(:all)
-  class FakeCommand < Struct.new(:name, :description)
+  class FakeTask < Struct.new(:name, :description)
     def to_s
-      "Duty::Commands::#{name}"
+      "Duty::Tasks::#{name}"
     end
   end
 end

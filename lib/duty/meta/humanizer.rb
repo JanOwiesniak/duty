@@ -1,9 +1,9 @@
 module Duty
   module Meta
     class Humanizer
-      def command(klass)
+      def task(klass)
         klass.to_s.
-          gsub("#{command_namespace}::", '').
+          gsub("#{task_namespace}::", '').
           gsub(/([A-Z])/, '-\1').
           split('-').
           reject(&:empty?).
@@ -13,8 +13,8 @@ module Duty
 
       private
 
-      def command_namespace
-        Commands::Registry::COMMAND_NAMESPACE
+      def task_namespace
+        Tasks::Registry::COMMAND_NAMESPACE
       end
     end
   end

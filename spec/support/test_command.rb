@@ -1,5 +1,5 @@
 module Duty
-  module Commands
+  module Tasks
     class Test
       ExecutionError = Class.new(RuntimeError)
 
@@ -9,7 +9,7 @@ module Duty
       end
 
       def self.description
-        "This is a test command"
+        "This is a test task"
       end
 
       def run
@@ -51,13 +51,13 @@ Usage: duty test [<args>]
 
       def execute
         if @given_arg == 'shell'
-          sh('pwd','First shell command')
-          sh('boom','Second shell command')
-          sh('pwd','Third shell command')
+          sh('pwd','First shell task')
+          sh('boom','Second shell task')
+          sh('pwd','Third shell task')
         else
-          ruby(Proc.new{},'First ruby command')
-          ruby(Proc.new{ raise RuntimeError.new },'Second ruby command')
-          ruby(Proc.new{},'Third ruby command')
+          ruby(Proc.new{},'First ruby task')
+          ruby(Proc.new{ raise RuntimeError.new },'Second ruby task')
+          ruby(Proc.new{},'Third ruby task')
         end
       end
 
