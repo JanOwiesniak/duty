@@ -19,7 +19,7 @@ module Duty
     end
 
     def valid?(task_class)
-      task_class == Duty::Tasks::Test
+      task_class.superclass == Duty::Tasks::Base
     end
 
     def require_all
