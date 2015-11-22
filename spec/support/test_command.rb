@@ -7,13 +7,15 @@ module Duty
 
       def execute
         if @arguments[0] == 'shell'
-          sh('pwd','First shell command')
-          sh('boom','Second shell command')
-          sh('pwd','Third shell command')
+          sh {}
+          sh('First shell command') { 'pwd' }
+          sh('Second shell command') { 'boom' }
+          sh('Third shell command') { 'pwd' }
         else
-          ruby(Proc.new{},'First ruby command')
-          ruby(Proc.new{ raise RuntimeError.new },'Second ruby command')
-          ruby(Proc.new{},'Third ruby command')
+          ruby {}
+          ruby('First ruby command') {}
+          ruby('Second ruby command') { raise RuntimeError.new }
+          ruby('Third ruby command') {}
         end
       end
     end

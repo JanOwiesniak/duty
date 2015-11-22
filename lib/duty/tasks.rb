@@ -62,14 +62,14 @@ module Duty
         @view.add_failure(msg)
       end
 
-      def ruby(callable, desc)
-        ruby = Ruby.new(callable)
+      def ruby(desc = '', &blk)
+        ruby = Ruby.new(blk)
         ruby.execute
         handle_errors(ruby, desc)
       end
 
-      def sh(cmd, desc)
-        shell = Shell.new(cmd)
+      def sh(desc = '', &blk)
+        shell = Shell.new(blk)
         shell.execute
         handle_errors(shell, desc)
       end
@@ -102,8 +102,8 @@ module Duty
 
       class Shell
         require 'open3'
-        def initialize(cmd)
-          @cmd = cmd 
+        def initialize(blk)
+          @cmd = blk.call 
           @success = false
         end
 
@@ -113,8 +113,12 @@ module Duty
 
         def execute
           begin
-            stdout, stderr, status = Open3.capture3(@cmd)
-            @success = true if status.success?
+            if @cmd
+              stdout, stderr, status = Open3.capture3(@cmd)
+              @success = true if status.success?
+            else
+              @success = true
+            end
           rescue Errno::ENOENT
             @success = false
           end
