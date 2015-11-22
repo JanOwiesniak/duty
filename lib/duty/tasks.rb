@@ -77,14 +77,6 @@ module Duty
         @view.command_failure(command)
       end
 
-      def success(msg)
-        @view.success(msg)
-      end
-
-      def failure(msg)
-        @view.failure(msg)
-      end
-
       def parallel(&blk)
         @parallel << Thread.new(&blk)
       end

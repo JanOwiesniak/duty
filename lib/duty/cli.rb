@@ -129,6 +129,8 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
         failure(description)
       end
 
+      private
+
       def success(msg)
         @output.print([check_mark, msg].join(' '))
       end
@@ -136,8 +138,6 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
       def failure(msg)
         @output.error([cross_mark, msg].join(' '))
       end
-
-      private
 
       def cross_mark
         unicode("2715")
