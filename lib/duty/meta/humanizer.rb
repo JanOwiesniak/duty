@@ -1,3 +1,5 @@
+require 'duty/registry'
+
 module Duty
   module Meta
     class Humanizer
