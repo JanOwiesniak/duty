@@ -6,6 +6,7 @@ module Duty
       def initialize(arguments, view)
         @arguments = arguments
         @view = view
+        @parallel = []
       end
 
       def run
@@ -14,7 +15,7 @@ module Duty
           add_message self.class.usage
         else
           begin
-            execute
+            execute_in_thread
             add_success("#{self.class.name} task executed")
           rescue ExecutionError
             add_failure("#{self.class.name} task aborted")
@@ -42,6 +43,13 @@ module Duty
 
       private
 
+      def execute_in_thread
+        Thread.new do
+          execute
+          @parallel.each {|thread| thread.join }
+        end.join
+      end
+
       def valid?
         !todo?(self.class.description) && !todo?(self.class.usage)
       end
@@ -62,13 +70,17 @@ module Duty
         @view.add_failure(msg)
       end
 
-      def ruby(desc = '', &blk)
+      def parallel(&blk)
+        @parallel << Thread.new(&blk)
+      end
+
+      def ruby(desc = 'Unknown ruby command', &blk)
         ruby = Ruby.new(blk)
         ruby.execute
         handle_errors(ruby, desc)
       end
 
-      def sh(desc = '', &blk)
+      def sh(desc = 'Unknown shell command', &blk)
         shell = Shell.new(blk)
         shell.execute
         handle_errors(shell, desc)

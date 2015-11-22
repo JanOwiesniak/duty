@@ -59,50 +59,114 @@ class IntegrationSpec < MiniTest::Spec
       end
 
       describe 'valid usage' do
-        describe 'with shell commands' do
-          it 'stops execution as soon as one task fails' do
-            assert_stdout /#{check_mark} First shell command/ do
-              exec("#{duty} test shell")
-            end
+        describe 'sequential' do
+          describe 'with shell commands' do
+            it 'runs commands in isolation' do
+              assert_stdout /#{check_mark} Unknown shell command/ do
+                exec("#{duty} test parallel")
+              end
 
-            assert_stderr /#{cross_mark} Second shell command/ do
-              exec("#{duty} test shell")
-            end
+              assert_stdout /#{check_mark} First parallel shell command/ do
+                exec("#{duty} test parallel")
+              end
 
-            assert_stderr /#{cross_mark} Test task aborted/ do
-              exec("#{duty} test shell")
-            end
+              assert_stderr /#{cross_mark} Second parallel shell command/ do
+                exec("#{duty} test parallel")
+              end
 
-            refute_stdout /Third shell command/ do
-              exec("#{duty} test shell")
-            end
+              assert_stderr /#{cross_mark} Test task aborted/ do
+                exec("#{duty} test parallel")
+              end
 
-            refute_stderr /Third shell command/ do
-              exec("#{duty} test shell")
+              refute_stdout /Third parallel shell command/ do
+                exec("#{duty} test parallel")
+              end
+
+              refute_stderr /Third parallel shell command/ do
+                exec("#{duty} test parallel")
+              end
+
+              assert_stdout /#{check_mark} Unknown ruby command/ do
+                exec("#{duty} test parallel")
+              end
+
+              assert_stdout /#{check_mark} First parallel ruby command/ do
+                exec("#{duty} test parallel")
+              end
+
+              assert_stderr /#{cross_mark} Second parallel ruby command/ do
+                exec("#{duty} test parallel")
+              end
+
+              assert_stderr /#{cross_mark} Test task aborted/ do
+                exec("#{duty} test parallel")
+              end
+
+              refute_stdout /Third parallel ruby command/ do
+                exec("#{duty} test parallel")
+              end
+
+              refute_stderr /Third parallel ruby command/ do
+                exec("#{duty} test parallel")
+              end
             end
           end
         end
 
-        describe 'with ruby commands' do
-          it 'stops execution as soon as one task fails' do
-            assert_stdout /#{check_mark} First ruby command/ do
-              exec("#{duty} test ruby")
-            end
+        describe 'sequential' do
+          describe 'with shell commands' do
+            it 'stops execution as soon as one task fails' do
+              assert_stdout /#{check_mark} Unknown shell command/ do
+                exec("#{duty} test sequential shell")
+              end
 
-            assert_stderr /#{cross_mark} Second ruby command/ do
-              exec("#{duty} test ruby")
-            end
+              assert_stdout /#{check_mark} First sequential shell command/ do
+                exec("#{duty} test sequential shell")
+              end
 
-            assert_stderr /#{cross_mark} Test task aborted/ do
-              exec("#{duty} test ruby")
-            end
+              assert_stderr /#{cross_mark} Second sequential shell command/ do
+                exec("#{duty} test sequential shell")
+              end
 
-            refute_stdout /Third ruby command/ do
-              exec("#{duty} test ruby")
-            end
+              assert_stderr /#{cross_mark} Test task aborted/ do
+                exec("#{duty} test sequential shell")
+              end
 
-            refute_stderr /Third ruby command/ do
-              exec("#{duty} test ruby")
+              refute_stdout /Third sequential shell command/ do
+                exec("#{duty} test sequential shell")
+              end
+
+              refute_stderr /Third sequential shell command/ do
+                exec("#{duty} test sequential shell")
+              end
+            end
+          end
+
+          describe 'with ruby commands' do
+            it 'stops execution as soon as one task fails' do
+              assert_stdout /#{check_mark} Unknown ruby command/ do
+                exec("#{duty} test sequential ruby")
+              end
+
+              assert_stdout /#{check_mark} First sequential ruby command/ do
+                exec("#{duty} test sequential ruby")
+              end
+
+              assert_stderr /#{cross_mark} Second sequential ruby command/ do
+                exec("#{duty} test sequential ruby")
+              end
+
+              assert_stderr /#{cross_mark} Test task aborted/ do
+                exec("#{duty} test sequential ruby")
+              end
+
+              refute_stdout /Third sequential ruby command/ do
+                exec("#{duty} test sequential ruby")
+              end
+
+              refute_stderr /Third sequential ruby command/ do
+                exec("#{duty} test sequential ruby")
+              end
             end
           end
         end
