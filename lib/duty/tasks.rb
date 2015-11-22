@@ -90,18 +90,14 @@ module Duty
       end
 
       def ruby(desc = 'Unknown ruby command', &blk)
-        ruby = Ruby.new(desc, blk)
-        ruby.execute
-        handle_errors(ruby, desc)
+        handle_errors(Ruby.run(desc, blk))
       end
 
       def sh(desc = 'Unknown shell command', &blk)
-        shell = Shell.new(desc, blk)
-        shell.execute
-        handle_errors(shell, desc)
+        handle_errors(Shell.run(desc, blk))
       end
 
-      def handle_errors(command, desc)
+      def handle_errors(command)
         if command.success?
           command_success(command)
         else
@@ -110,11 +106,15 @@ module Duty
         end
       end
 
-      class Ruby
+      class Command
         def initialize(description, callable)
           @description = description 
           @callable = callable
           @success = false
+        end
+
+        def self.run(description, callable)
+          new(description, callable).tap {|command| command.execute}
         end
 
         def success?
@@ -124,7 +124,9 @@ module Duty
         def description
           @description
         end
+      end
 
+      class Ruby < Command
         def execute
           @callable.call
           @success = true
@@ -132,26 +134,13 @@ module Duty
         end
       end
 
-      class Shell
+      class Shell < Command
         require 'open3'
-        def initialize(description, blk)
-          @description = description
-          @cmd = blk.call 
-          @success = false
-        end
-
-        def success?
-          @success
-        end
-
-        def description
-          @description
-        end
-
         def execute
+          cmd = @callable.call
           begin
-            if @cmd
-              stdout, stderr, status = Open3.capture3(@cmd)
+            if cmd
+              stdout, stderr, status = Open3.capture3(cmd)
               @success = true if status.success?
             else
               @success = true
