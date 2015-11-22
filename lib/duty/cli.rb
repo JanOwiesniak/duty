@@ -1,4 +1,4 @@
-require 'duty/tasks/registry'
+require 'duty/registry'
 require 'duty/meta'
 require 'yaml'
 
@@ -21,7 +21,7 @@ module Duty
     private
 
     def boot_registry
-      @registry = Duty::Tasks::Registry.new(additional_task_dir).tap {|r| r.require_all}
+      @registry = Duty::Registry.new(additional_task_dir).tap {|r| r.require_all}
     end
 
     def additional_task_dir

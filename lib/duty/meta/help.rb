@@ -1,4 +1,4 @@
-require 'duty/tasks/registry'
+require 'duty/registry'
 
 module Duty
   module Meta

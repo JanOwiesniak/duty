@@ -14,7 +14,7 @@ module Duty
       private
 
       def task_namespace
-        Tasks::Registry::COMMAND_NAMESPACE
+        Registry::COMMAND_NAMESPACE
       end
     end
   end
