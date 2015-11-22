@@ -10,15 +10,14 @@ module Duty
       end
 
       def run
-        unless valid?
-          add_message self.class.description
-          add_message self.class.usage
+        if !valid?
+          task_explain
         else
           begin
             execute_in_thread
-            add_success("#{self.class.name} task executed")
+            task_success
           rescue ExecutionError
-            add_failure("#{self.class.name} task aborted")
+            task_failure
           end
         end
       end
@@ -58,16 +57,32 @@ module Duty
         string.match(/TODO/)
       end
 
-      def add_message(msg)
-        @view.add_message(msg)
+      def task_explain
+        @view.task_explain(self)
       end
 
-      def add_success(msg)
-        @view.add_success(msg)
+      def task_success
+        @view.task_success(self)
       end
 
-      def add_failure(msg)
-        @view.add_failure(msg)
+      def task_failure
+        @view.task_failure(self)
+      end
+
+      def command_success(command)
+        @view.command_success(command)
+      end
+
+      def command_failure(command)
+        @view.command_failure(command)
+      end
+
+      def success(msg)
+        @view.success(msg)
+      end
+
+      def failure(msg)
+        @view.failure(msg)
       end
 
       def parallel(&blk)
@@ -75,34 +90,39 @@ module Duty
       end
 
       def ruby(desc = 'Unknown ruby command', &blk)
-        ruby = Ruby.new(blk)
+        ruby = Ruby.new(desc, blk)
         ruby.execute
         handle_errors(ruby, desc)
       end
 
       def sh(desc = 'Unknown shell command', &blk)
-        shell = Shell.new(blk)
+        shell = Shell.new(desc, blk)
         shell.execute
         handle_errors(shell, desc)
       end
 
-      def handle_errors(execution, desc)
-        if execution.success?
-          add_success desc
+      def handle_errors(command, desc)
+        if command.success?
+          command_success(command)
         else
-          add_failure desc
+          command_failure(command)
           raise ExecutionError.new
         end
       end
 
       class Ruby
-        def initialize(callable)
+        def initialize(description, callable)
+          @description = description 
           @callable = callable
           @success = false
         end
 
         def success?
           @success
+        end
+
+        def description
+          @description
         end
 
         def execute
@@ -114,13 +134,18 @@ module Duty
 
       class Shell
         require 'open3'
-        def initialize(blk)
+        def initialize(description, blk)
+          @description = description
           @cmd = blk.call 
           @success = false
         end
 
         def success?
           @success
+        end
+
+        def description
+          @description
         end
 
         def execute

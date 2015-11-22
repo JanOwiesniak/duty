@@ -100,15 +100,40 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
         @output = output
       end
 
-      def add_message(msg)
-        @output.print(msg)
+      def task_explain(task)
+        task_class = task.class
+        description = task_class.description
+        usage = task_class.usage
+
+        @output.print(description)
+        @output.print(usage)
       end
 
-      def add_success(msg)
+      def task_success(task)
+        task_name = task.class.name
+        success("#{task_name} task executed")
+      end
+
+      def task_failure(task)
+        task_name = task.class.name
+        failure("#{task_name} task aborted")
+      end
+
+      def command_success(command)
+        description = command.description
+        success(description)
+      end
+
+      def command_failure(command)
+        description = command.description
+        failure(description)
+      end
+
+      def success(msg)
         @output.print([check_mark, msg].join(' '))
       end
 
-      def add_failure(msg)
+      def failure(msg)
         @output.error([cross_mark, msg].join(' '))
       end
 
