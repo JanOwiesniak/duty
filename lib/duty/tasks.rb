@@ -103,6 +103,7 @@ module Duty
           @description = description 
           @callable = callable
           @success = false
+          @error = nil
         end
 
         def self.run(description, callable)
@@ -116,13 +117,18 @@ module Duty
         def description
           @description
         end
+
+        def error
+          @error
+        end
       end
 
       class Ruby < Command
         def execute
           @callable.call
           @success = true
-        rescue
+        rescue Exception => e
+          @error = e.message
         end
       end
 
@@ -130,15 +136,21 @@ module Duty
         require 'open3'
         def execute
           cmd = @callable.call
+
+          if !cmd
+            @success = true
+            return
+          end
+
           begin
-            if cmd
-              stdout, stderr, status = Open3.capture3(cmd)
-              @success = true if status.success?
-            else
+            stdout, stderr, status = Open3.capture3(cmd)
+            if status.success?
               @success = true
+            else
+              @error = stderr
             end
-          rescue Errno::ENOENT
-            @success = false
+          rescue Exception => e
+            @error = e.message
           end
         end
       end

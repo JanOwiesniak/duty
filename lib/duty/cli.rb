@@ -81,7 +81,7 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
     def task_for(args)
       task_string, *rest = args
       arguments = Arguments.new(rest)
-      view = View.new(Out.new)
+      view = VerboseView.new(Out.new)
       task_class_for(task_string).new(arguments, view)
     end
 
@@ -149,6 +149,14 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
 
       def unicode(code)
         ["0x#{code}".hex].pack('U')
+      end
+    end
+
+    class VerboseView < View
+      def command_failure(command)
+        description = command.description
+        error = command.error
+        failure([description, error].join(' Error: '))
       end
     end
 
