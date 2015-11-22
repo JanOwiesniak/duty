@@ -14,7 +14,7 @@ class IntegrationSpec < MiniTest::Spec
         exec(duty)
       end
 
-      assert_stdout /test\s*This is a test task/ do
+      assert_stdout /test\s*TODO: Describe your task by overwriting `self\.description`/ do
         exec(duty)
       end
     end
@@ -46,54 +46,62 @@ class IntegrationSpec < MiniTest::Spec
     describe 'test' do
       describe 'invalid usage' do
         it 'describes the task' do
-          assert_stdout /This is a test task\s{1}/ do
+          assert_stdout /TODO: Describe your task by overwriting `self.description`/ do
             exec("#{duty} test")
           end
         end
 
         it 'explains how to use the task' do
-          assert_stdout /Usage: duty test \[<args>\]\s{1}/ do
+          assert_stdout /TODO: Explain your task by overwriting `self.usage`/ do
             exec("#{duty} test")
           end
         end
       end
 
       describe 'valid usage' do
-        describe 'with shell tasks' do
+        describe 'with shell commands' do
           it 'stops execution as soon as one task fails' do
-            assert_stdout /#{check_mark} First shell task/ do
+            assert_stdout /#{check_mark} First shell command/ do
               exec("#{duty} test shell")
             end
 
-            assert_stderr /#{cross_mark} Second shell task/ do
+            assert_stderr /#{cross_mark} Second shell command/ do
               exec("#{duty} test shell")
             end
 
-            refute_stdout /Third shell task/ do
+            assert_stderr /#{cross_mark} Test task aborted/ do
               exec("#{duty} test shell")
             end
 
-            refute_stderr /Third shell task/ do
+            refute_stdout /Third shell command/ do
+              exec("#{duty} test shell")
+            end
+
+            refute_stderr /Third shell command/ do
               exec("#{duty} test shell")
             end
           end
         end
 
-        describe 'with ruby tasks' do
+        describe 'with ruby commands' do
           it 'stops execution as soon as one task fails' do
-            assert_stdout /#{check_mark} First ruby task/ do
+            assert_stdout /#{check_mark} First ruby command/ do
               exec("#{duty} test ruby")
             end
 
-            assert_stderr /#{cross_mark} Second ruby task/ do
+            assert_stderr /#{cross_mark} Second ruby command/ do
               exec("#{duty} test ruby")
             end
 
-            refute_stdout /Third shell ruby/ do
+            assert_stderr /#{cross_mark} Test task aborted/ do
               exec("#{duty} test ruby")
             end
 
-            refute_stderr /Third shell ruby/ do
+            refute_stdout /Third ruby command/ do
+              exec("#{duty} test ruby")
+            end
+
+            refute_stderr /Third ruby command/ do
               exec("#{duty} test ruby")
             end
           end
