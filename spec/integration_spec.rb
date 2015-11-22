@@ -22,7 +22,7 @@ class IntegrationSpec < MiniTest::Spec
 
   describe 'with unknown command' do
     it 'explains that the given command is invalid' do
-      assert_stdout /duty: `foo bar` is not a duty command\s{1}/ do
+      assert_stdout /duty: `foo bar` is not a duty command/ do
         exec("#{duty} foo bar")
       end
     end
@@ -30,7 +30,7 @@ class IntegrationSpec < MiniTest::Spec
 
   describe 'with --cmplt for shell completion' do
     it 'returns all commands without input' do
-      assert_stdout /start-feature\stest/ do
+      assert_stdout /test/ do
         exec("#{duty} --cmplt")
       end
     end
@@ -59,28 +59,42 @@ class IntegrationSpec < MiniTest::Spec
       end
 
       describe 'valid usage' do
-        describe 'on success' do
-          it 'displays all executed commands' do
-            assert_stdout /#{check_mark} Done something great/ do
-              exec("#{duty} test success")
+        describe 'with shell commands' do
+          it 'stops execution as soon as one command fails' do
+            assert_stdout /#{check_mark} First shell command/ do
+              exec("#{duty} test shell")
             end
 
-            assert_stdout /#{check_mark} This was even greater/ do
-              exec("#{duty} test success")
+            assert_stderr /#{cross_mark} Second shell command/ do
+              exec("#{duty} test shell")
+            end
+
+            refute_stdout /Third shell command/ do
+              exec("#{duty} test shell")
+            end
+
+            refute_stderr /Third shell command/ do
+              exec("#{duty} test shell")
             end
           end
         end
 
-        describe 'on failure' do
-          it 'displays executed commands' do
-            assert_stdout /#{cross_mark} Done something great/ do
-              exec("#{duty} test fail")
+        describe 'with ruby commands' do
+          it 'stops execution as soon as one command fails' do
+            assert_stdout /#{check_mark} First ruby command/ do
+              exec("#{duty} test ruby")
             end
-          end
 
-          it 'does not display not executed commands' do
-            refute_stdout /This was even greater/ do
-              exec("#{duty} test fail")
+            assert_stderr /#{cross_mark} Second ruby command/ do
+              exec("#{duty} test ruby")
+            end
+
+            refute_stdout /Third shell ruby/ do
+              exec("#{duty} test ruby")
+            end
+
+            refute_stderr /Third shell ruby/ do
+              exec("#{duty} test ruby")
             end
           end
         end
@@ -108,13 +122,28 @@ class IntegrationSpec < MiniTest::Spec
 
   def assert_stdout(expected, &command)
     stdout, stderr, status = yield command
+    unless status.success?
+      assert_equal 0, status.exitstatus, stderr
+    end
     assert_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
-    assert_equal true, status.success?, "Expected status to be 0 but got #{status}"
   end
 
   def refute_stdout(expected, &command)
-    stdout, stderr, status = yield command
+    stdout, _, _ = yield command
     refute_match expected, stdout, "Expected stdout to be #{expected} but got #{stdout}"
+  end
+
+  def assert_stderr(expected, &command)
+    stdout, stderr, status = yield command
+    unless status.success?
+      assert_equal 0, status.exitstatus, stderr
+    end
+    assert_match expected, stderr, "Expected stdout to be #{expected} but got #{stderr}"
+  end
+
+  def refute_stderr(expected, &command)
+    _, stderr, _ = yield command
+    refute_match expected, stderr, "Expected stdout to be #{expected} but got #{stderr}"
   end
 
   def exec(*commands)

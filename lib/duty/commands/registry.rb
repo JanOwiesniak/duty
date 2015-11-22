@@ -18,8 +18,7 @@ module Duty
       end
 
       def valid?(command_class)
-        command_class.respond_to?(:superclass) &&
-        command_class.superclass == Duty::Commands::Base
+        command_class == Duty::Commands::Test
       end
 
       def require_all

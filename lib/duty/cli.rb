@@ -15,7 +15,7 @@ module Duty
     def exec
       stdout usage if needs_help?
       stdout completion if needs_completion?
-      stdout execute_commands(@args)
+      execute_commands(@args)
     end
 
     private
@@ -72,16 +72,69 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
     def execute_commands(args)
       begin
         command = command_for(args)
+        command.run
       rescue NameError => e
-        return invalid_command(args)
+        stdout invalid_command(args, e.message)
       end
-
-      present(command)
     end
 
     def command_for(args)
       command_string, *rest = args
-      command_class_for(command_string).new(rest)
+      arguments = Arguments.new(rest)
+      view = View.new(Out.new)
+      command_class_for(command_string).new(arguments, view)
+    end
+
+    class Arguments
+      def initialize(args)
+        @args = [args].flatten
+      end
+
+      def[](index)
+        @args[index]
+      end
+    end
+
+    class View
+      def initialize(output)
+        @output = output
+      end
+
+      def add_message(msg)
+        @output.print(msg)
+      end
+
+      def add_success(msg)
+        @output.print([check_mark, msg].join(' '))
+      end
+
+      def add_failure(msg)
+        @output.error([cross_mark, msg].join(' '))
+      end
+
+      private
+
+      def cross_mark
+        unicode("2715")
+      end
+
+      def check_mark
+        unicode("2713")
+      end
+
+      def unicode(code)
+        ["0x#{code}".hex].pack('U')
+      end
+    end
+
+    class Out
+      def print(*args)
+        $stdout.puts(*args)
+      end
+
+      def error(*args)
+        $stderr.puts(*args)
+      end
     end
 
     def command_class_for(string)
@@ -93,72 +146,8 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
       string.split('-').collect(&:capitalize).join
     end
 
-    def invalid_command(args)
-      "duty: `#{args.join(' ')}` is not a duty command"
-    end
-
-    def present(command)
-      presenter_for(command).present
-    end
-
-    def presenter_for(command)
-      Presenter.new(command)
-    end
-
-    class Presenter
-      def initialize(command)
-        @command = command
-      end
-
-      def present
-        if command.valid?
-          worker = command.call
-          summary = Summary.new(worker)
-          summary.to_s
-        else
-          command.usage
-        end
-      end
-
-      private
-
-      def command
-        @command
-      end
-
-      class Summary
-        def initialize(worker)
-          @worker = worker
-        end
-
-        def to_s
-          formatted
-        end
-
-        private
-
-        def formatted
-          commands = @worker.executed.map do |command|
-            "#{state(command)} #{command.describe}"
-          end.join("\n")
-        end
-
-        def state(command)
-          command.error? ? cross_mark : check_mark
-        end
-
-        def cross_mark
-          unicode("2715")
-        end
-
-        def check_mark
-          unicode("2713")
-        end
-
-        def unicode(code)
-          ["0x#{code}".hex].pack('U')
-        end
-      end
+    def invalid_command(args, error_message)
+      "duty: `#{args.join(' ')}` is not a duty command. Failed with: #{error_message}"
     end
   end
 end
