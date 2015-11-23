@@ -1,4 +1,4 @@
-require 'duty/commands/registry'
+require 'duty/registry'
 require 'duty/meta'
 require 'yaml'
 
@@ -8,34 +8,30 @@ module Duty
     DUTY_CONFIG_FILENAME = '.duty.yml'
 
     def initialize(args)
-      @args = args
-      boot_registry
+      @input = Input.new(args)
+      @registry = Duty::Registry.load(additional_tasks_dir)
     end
 
     def exec
-      stdout usage if needs_help?
-      stdout completion if needs_completion?
-      stdout execute_commands(@args)
+      stdout usage if help?
+      stdout completion if completion?
+      run_task
     end
 
     private
 
-    def boot_registry
-      @registry = Duty::Commands::Registry.new(additional_command_dir).tap {|r| r.require_all}
-    end
-
-    def additional_command_dir
+    def additional_tasks_dir
       if File.exists?(DUTY_CONFIG_FILENAME)
         duty_config = load_config(DUTY_CONFIG_FILENAME)
-        command_dir = duty_config["commands"]
-        if Dir.exists?(command_dir)
-          command_dir
+        task_dir = duty_config["tasks"]
+        if Dir.exists?(task_dir)
+          task_dir
         else
           error_message = <<-EOF
 Oops something went wrong!
 
-You defined `#{command_dir}` as an additional commands dir but this dir does not exist.
-Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
+You defined `#{task_dir}` as an additional tasks dir but this dir does not exist.
+Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
           EOF
 
           print error_message
@@ -57,107 +53,183 @@ Please check the `commands` section in your `#{DUTY_CONFIG_FILENAME}` file.
       Duty::Meta::Help.new(self).to_s
     end
 
-    def needs_help?
-      @args.empty? || @args == %w(-h) || @args == %w(--help)
-    end
-
     def completion
-      Duty::Meta::Completion.new(self, @args.drop(1)).to_s
+      Duty::Meta::Completion.new(self, @input.drop(1)).to_s
     end
 
-    def needs_completion?
-      @args.first == '--cmplt'
+    def verbose?
+      @input.verbose?
     end
 
-    def execute_commands(args)
+    def completion?
+      @input.completion?
+    end
+
+    def help?
+      @input.help?
+    end
+
+    def run_task
       begin
-        command = command_for(args)
+        task.run
       rescue NameError => e
-        return invalid_command(args)
+        stdout invalid_task(e.message)
+      end
+    end
+
+    def task
+      @input.task_class.new(@input.task_input, view)
+    end
+
+    def invalid_task(error_message)
+      "duty: `#{@input.join(' ')}` is not a duty task. Failed with: #{error_message}"
+    end
+
+    def view
+      if verbose?
+        VerboseView.new(out)
+      else
+        View.new(out)
+      end
+    end
+
+    def out
+      Out.new
+    end
+
+    class Input
+      def initialize(args)
+        @args = [args].flatten
       end
 
-      present(command)
-    end
-
-    def command_for(args)
-      command_string, *rest = args
-      command_class_for(command_string).new(rest)
-    end
-
-    def command_class_for(string)
-      command_class = command_to_class_name(string)
-      Object.const_get("Duty::Commands::#{command_class}")
-    end
-
-    def command_to_class_name(string)
-      string.split('-').collect(&:capitalize).join
-    end
-
-    def invalid_command(args)
-      "duty: `#{args.join(' ')}` is not a duty command"
-    end
-
-    def present(command)
-      presenter_for(command).present
-    end
-
-    def presenter_for(command)
-      Presenter.new(command)
-    end
-
-    class Presenter
-      def initialize(command)
-        @command = command
+      def[](index)
+        @args[index]
       end
 
-      def present
-        if command.valid?
-          worker = command.call
-          summary = Summary.new(worker)
-          summary.to_s
-        else
-          command.usage
-        end
+      def drop(index)
+        @args.drop(1)
+      end
+
+      def task_name
+        task, *rest = @args
+        task
+      end
+
+      def task_class
+        name = task_name.split('-').collect(&:capitalize).join
+        Object.const_get("Duty::Tasks::#{name}")
+      end
+
+      def task_input
+        task, *rest = @args
+        rest
+      end
+
+      def join(seperator='')
+        @args.join(seperator)
+      end
+
+      def verbose?
+        @args.include?('-v') || @args.include?('--verbose')
+      end
+
+      def completion?
+        @args.first == '--cmplt'
+      end
+
+      def help?
+        @args.empty? || @args == %w(-h) || @args == %w(--help)
+      end
+    end
+
+    class View
+      def initialize(output)
+        @output = output
+      end
+
+      def task_explain(task)
+        task_class = task.class
+        description = task_class.description
+        usage = task_class.usage
+
+        @output.print(description)
+        @output.print(usage)
+      end
+
+      def task_success(task)
+        task_name = task.class.name
+        success("#{task_name} task executed")
+      end
+
+      def task_failure(task)
+        task_name = task.class.name
+        failure("#{task_name} task aborted")
+      end
+
+      def command_success(command)
+        description = command.description
+        success(description)
+      end
+
+      def command_failure(command)
+        description = command.description
+        failure(description)
       end
 
       private
 
-      def command
-        @command
+      def success(msg)
+        @output.print([check_mark, msg].join(' '))
       end
 
-      class Summary
-        def initialize(worker)
-          @worker = worker
-        end
+      def failure(msg)
+        @output.error([cross_mark, msg].join(' '))
+      end
 
-        def to_s
-          formatted
-        end
+      def cross_mark
+        unicode("2715")
+      end
 
-        private
+      def check_mark
+        unicode("2713")
+      end
 
-        def formatted
-          commands = @worker.executed.map do |command|
-            "#{state(command)} #{command.describe}"
-          end.join("\n")
-        end
+      def unicode(code)
+        ["0x#{code}".hex].pack('U')
+      end
+    end
 
-        def state(command)
-          command.error? ? cross_mark : check_mark
-        end
+    class VerboseView < View
+      def command_success(command)
+        success(command_msg(command))
+      end
 
-        def cross_mark
-          unicode("2715")
-        end
+      def command_failure(command)
+        failure(command_msg(command))
+      end
 
-        def check_mark
-          unicode("2713")
-        end
+      private
 
-        def unicode(code)
-          ["0x#{code}".hex].pack('U')
+      def command_msg(command)
+        [command.description, command_logs(command)].join(' ')
+      end
+
+      def command_logs(command)
+        elements = command.logger.flatten
+
+        if elements.any?
+          ["|>", elements.join(' | ')].join(' ')
         end
+      end
+    end
+
+    class Out
+      def print(*args)
+        $stdout.puts(*args)
+      end
+
+      def error(*args)
+        $stderr.puts(*args)
       end
     end
   end

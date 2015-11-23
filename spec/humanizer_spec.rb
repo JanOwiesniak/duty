@@ -5,9 +5,9 @@ class MetaHumanizerSpec < MiniTest::Spec
   describe "humanizer" do
     subject { Duty::Meta::Humanizer.new }
 
-    it "humanizes commands" do
-      expected = "some-command"
-      assert_equal expected, subject.command("Duty::Commands::SomeCommand")
+    it "humanizes tasks" do
+      expected = "some-task"
+      assert_equal expected, subject.task("Duty::Tasks::SomeTask")
     end
   end
 end

@@ -1,5 +1,3 @@
-require 'duty/commands/registry'
-
 module Duty
   module Meta
     class Completion
@@ -19,19 +17,19 @@ module Duty
       end
 
       def possible_completions
-        matching_commands.join("\n")
+        matching_tasks.join("\n")
       end
 
-      def matching_commands
-        humanized_commands.select do |cmd|
+      def matching_tasks
+        humanized_tasks.select do |cmd|
           cmd.start_with?(@input)
         end
       end
 
-      def humanized_commands
+      def humanized_tasks
         humanizer = Humanizer.new
         registry.all.map do |klass|
-          humanizer.command(klass)
+          humanizer.task(klass)
         end
       end
     end

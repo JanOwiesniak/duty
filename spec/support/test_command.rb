@@ -1,38 +1,68 @@
 module Duty
   module Commands
-    class Test < Duty::Commands::Base
-      def initialize(*args)
-        @given_arg = [args].flatten.first
+    module Test
+      def shell_commands(test_type)
+        sh {}
+        sh("First #{test_type} shell command") { 'pwd' }
+        sh("Second #{test_type} shell command") { 'boom' }
+        sh("Third #{test_type} shell command") { 'pwd' }
       end
 
-      def self.description
-        "This is a test command"
+      def ruby_commands(test_type)
+        ruby {}
+        ruby("First #{test_type} ruby command") {}
+        ruby("Second #{test_type} ruby command") { raise RuntimeError.new }
+        ruby("Third #{test_type} ruby command") {}
       end
+    end
+  end
+end
 
-      def usage
-        <<-EOF
-#{self.class.description}
+module Duty
+  module Tasks
+    class Test < Base
+      include Duty::Commands::Test
 
-Usage: duty test [<args>]
-        EOF
+      def execute
+        if sequential? 
+          shell_commands(test_type) if shell?
+          ruby_commands(test_type) if ruby?
+        end
+
+        if parallel? 
+          parallel { shell_commands(test_type) }
+          parallel { ruby_commands(test_type) }
+        end
       end
 
       def valid?
-        !!@given_arg
+        !!test_type
       end
 
-      def commands
-        if @given_arg == 'success'
-          [
-            command('pwd','Done something great'),
-            command('pwd','This was even greater')
-          ]
-        else
-          [
-            command('this_wont_work','Done something great'),
-            command('pwd','This was even greater')
-          ]
-        end
+      private
+
+      def sequential?
+        test_type == 'sequential'
+      end
+
+      def parallel?
+        test_type == 'parallel'
+      end
+
+      def test_type
+        @arguments[0]
+      end
+
+      def ruby?
+        test_command == 'ruby'
+      end
+
+      def shell?
+        test_command == 'shell'
+      end
+
+      def test_command
+        @arguments[1]
       end
     end
   end
