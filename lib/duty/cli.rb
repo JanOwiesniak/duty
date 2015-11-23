@@ -169,10 +169,26 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
     end
 
     class VerboseView < View
+      def command_success(command)
+        success(command_msg(command))
+      end
+
       def command_failure(command)
-        description = command.description
-        error = command.error
-        failure([description, error].join(' Error: '))
+        failure(command_msg(command))
+      end
+
+      private
+
+      def command_msg(command)
+        [command.description, command_logs(command)].join(' ')
+      end
+
+      def command_logs(command)
+        elements = command.logger.flatten
+
+        if elements.any?
+          ["|>", elements.join(' | ')].join(' ')
+        end
       end
     end
 

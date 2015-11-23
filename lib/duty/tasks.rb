@@ -104,6 +104,7 @@ module Duty
           @callable = callable
           @success = false
           @error = nil
+          @logger = []
         end
 
         def self.run(description, callable)
@@ -118,6 +119,10 @@ module Duty
           @description
         end
 
+        def logger
+          @logger
+        end
+
         def error
           @error
         end
@@ -125,33 +130,74 @@ module Duty
 
       class Ruby < Command
         def execute
-          @callable.call
-          @success = true
-        rescue Exception => e
-          @error = e.message
+          begin
+            @callable.call
+            @success = true
+          rescue Exception => e
+            @error = "ERROR: #{e.inspect}"
+          ensure
+            @logger << summary 
+            @logger << error
+          end
+        end
+
+        private
+
+        def summary
+          "[RUBY] #{@callable.inspect}"
         end
       end
 
       class Shell < Command
         require 'open3'
         def execute
-          cmd = @callable.call
-
           if !cmd
             @success = true
             return
           end
 
           begin
-            stdout, stderr, status = Open3.capture3(cmd)
-            if status.success?
-              @success = true
-            else
-              @error = stderr
-            end
+            @stdout, @stderr, @status = Open3.capture3(cmd)
+            @success = true if status.success?
           rescue Exception => e
-            @error = e.message
+            @error = "ERROR: #{e.inspect}"
+          ensure
+            @logger << summary 
+            @logger << error
           end
+        end
+
+        private
+
+        def summary
+          [
+            "[SHELL]",
+            "COMMAND: #{cmd}",
+            "DIR: #{dir}",
+            "STDOUT: #{stdout}",
+            "STDERR: #{stderr}",
+            "STATUS: #{status}"
+          ]
+        end
+
+        def stdout
+          @stdout
+        end
+
+        def stderr
+          @stderr
+        end
+
+        def status
+          @status
+        end
+
+        def cmd
+          @cmd ||= @callable.call
+        end
+
+        def dir
+          Dir.pwd
         end
       end
     end
