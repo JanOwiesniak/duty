@@ -81,8 +81,24 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
     def task_for(args)
       task_string, *rest = args
       arguments = Arguments.new(rest)
-      view = VerboseView.new(Out.new)
       task_class_for(task_string).new(arguments, view)
+    end
+
+    def view
+      if verbose?
+        VerboseView.new(out)
+      else
+        View.new(out)
+      end
+    end
+
+    def out
+      Out.new
+    end
+
+    def verbose?
+      @args.include?('-v') ||
+      @args.include?('--verbose')
     end
 
     class Arguments
