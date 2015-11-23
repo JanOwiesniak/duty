@@ -9,7 +9,7 @@ module Duty
 
     def initialize(args)
       @input = Input.new(args)
-      @registry = Duty::Registry.new(additional_task_dir).tap {|r| r.require_all}
+      @registry = Duty::Registry.load(additional_tasks_dir)
     end
 
     def exec
@@ -20,7 +20,7 @@ module Duty
 
     private
 
-    def additional_task_dir
+    def additional_tasks_dir
       if File.exists?(DUTY_CONFIG_FILENAME)
         duty_config = load_config(DUTY_CONFIG_FILENAME)
         task_dir = duty_config["tasks"]

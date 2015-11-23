@@ -9,6 +9,10 @@ module Duty
       @additional_tasks_dir = additional_tasks_dir
     end
 
+    def self.load(additional_tasks_dir = nil)
+      new(additional_tasks_dir).tap {|r| r.require_all}
+    end
+
     def all
       task_names = COMMAND_NAMESPACE.constants - [:Base]
       task_names.reduce([]) do |task_classes, task_name|
