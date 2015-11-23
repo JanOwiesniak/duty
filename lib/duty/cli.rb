@@ -8,21 +8,17 @@ module Duty
     DUTY_CONFIG_FILENAME = '.duty.yml'
 
     def initialize(args)
-      @args = args
-      boot_registry
+      @input = Input.new(args)
+      @registry = Duty::Registry.new(additional_task_dir).tap {|r| r.require_all}
     end
 
     def exec
-      stdout usage if needs_help?
-      stdout completion if needs_completion?
-      execute_tasks(@args)
+      stdout usage if help?
+      stdout completion if completion?
+      run_task
     end
 
     private
-
-    def boot_registry
-      @registry = Duty::Registry.new(additional_task_dir).tap {|r| r.require_all}
-    end
 
     def additional_task_dir
       if File.exists?(DUTY_CONFIG_FILENAME)
@@ -57,31 +53,36 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
       Duty::Meta::Help.new(self).to_s
     end
 
-    def needs_help?
-      @args.empty? || @args == %w(-h) || @args == %w(--help)
-    end
-
     def completion
-      Duty::Meta::Completion.new(self, @args.drop(1)).to_s
+      Duty::Meta::Completion.new(self, @input.drop(1)).to_s
     end
 
-    def needs_completion?
-      @args.first == '--cmplt'
+    def verbose?
+      @input.verbose?
     end
 
-    def execute_tasks(args)
+    def completion?
+      @input.completion?
+    end
+
+    def help?
+      @input.help?
+    end
+
+    def run_task
       begin
-        task = task_for(args)
         task.run
       rescue NameError => e
-        stdout invalid_task(args, e.message)
+        stdout invalid_task(e.message)
       end
     end
 
-    def task_for(args)
-      task_string, *rest = args
-      arguments = Arguments.new(rest)
-      task_class_for(task_string).new(arguments, view)
+    def task
+      @input.task_class.new(@input.task_input, view)
+    end
+
+    def invalid_task(error_message)
+      "duty: `#{@input.join(' ')}` is not a duty task. Failed with: #{error_message}"
     end
 
     def view
@@ -96,18 +97,48 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
       Out.new
     end
 
-    def verbose?
-      @args.include?('-v') ||
-      @args.include?('--verbose')
-    end
-
-    class Arguments
+    class Input
       def initialize(args)
         @args = [args].flatten
       end
 
       def[](index)
         @args[index]
+      end
+
+      def drop(index)
+        @args.drop(1)
+      end
+
+      def task_name
+        task, *rest = @args
+        task
+      end
+
+      def task_class
+        name = task_name.split('-').collect(&:capitalize).join
+        Object.const_get("Duty::Tasks::#{name}")
+      end
+
+      def task_input
+        task, *rest = @args
+        rest
+      end
+
+      def join(seperator='')
+        @args.join(seperator)
+      end
+
+      def verbose?
+        @args.include?('-v') || @args.include?('--verbose')
+      end
+
+      def completion?
+        @args.first == '--cmplt'
+      end
+
+      def help?
+        @args.empty? || @args == %w(-h) || @args == %w(--help)
       end
     end
 
@@ -200,19 +231,6 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
       def error(*args)
         $stderr.puts(*args)
       end
-    end
-
-    def task_class_for(string)
-      task_class = task_to_class_name(string)
-      Object.const_get("Duty::Tasks::#{task_class}")
-    end
-
-    def task_to_class_name(string)
-      string.split('-').collect(&:capitalize).join
-    end
-
-    def invalid_task(args, error_message)
-      "duty: `#{args.join(' ')}` is not a duty task. Failed with: #{error_message}"
     end
   end
 end
