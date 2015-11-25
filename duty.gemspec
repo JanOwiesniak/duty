@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Jan Owiesniak"]
   spec.email         = ["owiesniak@mailbox.org"]
 
-  spec.summary       = "High-level repository operations"
-  spec.description   = "Duty provides high-level repository operations for common git tasks"
+  spec.summary       = "Extendable Task Manager"
+  spec.description   = "Duty provides a CLI for high-level tasks"
   spec.homepage      = "https://github.com/JanOwiesniak/duty"
   spec.license       = "MIT"
 
