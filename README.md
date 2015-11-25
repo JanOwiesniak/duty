@@ -6,16 +6,17 @@ Craft.
 Don't battle.
 Do your duty, let me handle the rest.
 
-## Install
+## Installation
 
 ```
-not published on rubygems.org yet
+$ gem install duty
 ```
 
 ## Add executable to your $PATH
 
 ```
-export PATH="$PATH:$HOME/path/to/duty/bin"
+$ export PATH="$PATH:$HOME/path/to/duty/bin"
+```
 ```
 
 ## Add shell completion
@@ -31,7 +32,7 @@ source duty.completion
 ## Usage
 
 ```
-duty <task> [<args>]
+$ duty <task> [<args>]
 ```
 
 ## Naming conventions
