@@ -1,15 +1,16 @@
 require 'duty/registry'
+require 'duty/plugins'
 require 'duty/meta'
-require 'yaml'
 
 module Duty
   class CLI
-    attr_reader :registry
     DUTY_CONFIG_FILENAME = '.duty.yml'
+    attr_reader :registry
 
     def initialize(args)
       @input = Input.new(args)
-      @registry = Duty::Registry.load(additional_tasks_dir)
+      @output = Output.new
+      @registry = Duty::Registry.load(plugins)
     end
 
     def exec
@@ -20,28 +21,10 @@ module Duty
 
     private
 
-    def additional_tasks_dir
-      if File.exists?(DUTY_CONFIG_FILENAME)
-        duty_config = load_config(DUTY_CONFIG_FILENAME)
-        task_dir = duty_config["tasks"]
-        if Dir.exists?(task_dir)
-          task_dir
-        else
-          error_message = <<-EOF
-Oops something went wrong!
+    attr_reader :input, :output
 
-You defined `#{task_dir}` as an additional tasks dir but this dir does not exist.
-Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
-          EOF
-
-          print error_message
-          exit -1
-        end
-      end
-    end
-
-    def load_config(filename)
-      YAML.load(File.read(filename))
+    def plugins
+      Duty::Plugins.load(DUTY_CONFIG_FILENAME)
     end
 
     def stdout(string)
@@ -49,24 +32,20 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
       exit 0
     end
 
+    def help?
+      input.help?
+    end
+
     def usage
       Duty::Meta::Help.new(self).to_s
     end
 
-    def completion
-      Duty::Meta::Completion.new(self, @input.drop(1)).to_s
-    end
-
-    def verbose?
-      @input.verbose?
-    end
-
     def completion?
-      @input.completion?
+      input.completion?
     end
 
-    def help?
-      @input.help?
+    def completion
+      Duty::Meta::Completion.new(self, input.drop(1)).to_s
     end
 
     def run_task
@@ -78,23 +57,23 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
     end
 
     def task
-      @input.task_class.new(@input.task_input, view)
+      input.task_class.new(input.task_input, view)
     end
 
     def invalid_task(error_message)
-      "duty: `#{@input.join(' ')}` is not a duty task. Failed with: #{error_message}"
+      "duty: `#{input.join(' ')}` is not a duty task. Failed with: #{error_message}"
     end
 
     def view
       if verbose?
-        VerboseView.new(out)
+        VerboseView.new(output)
       else
-        View.new(out)
+        View.new(output)
       end
     end
 
-    def out
-      Out.new
+    def verbose?
+      input.verbose?
     end
 
     class Input
@@ -139,6 +118,16 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
 
       def help?
         @args.empty? || @args == %w(-h) || @args == %w(--help)
+      end
+    end
+
+    class Output
+      def print(*args)
+        $stdout.puts(*args)
+      end
+
+      def error(*args)
+        $stderr.puts(*args)
       end
     end
 
@@ -220,16 +209,6 @@ Please check the `tasks` section in your `#{DUTY_CONFIG_FILENAME}` file.
         if elements.any?
           ["|>", elements.join(' | ')].join(' ')
         end
-      end
-    end
-
-    class Out
-      def print(*args)
-        $stdout.puts(*args)
-      end
-
-      def error(*args)
-        $stderr.puts(*args)
       end
     end
   end

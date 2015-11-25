@@ -24,21 +24,39 @@ class MetaCompletionSpec < MiniTest::Spec
   end
 
   def fake_registry
-    FakeRegistry.new([
-      fake_task("TaskA", "Some description"),
-      fake_task("TaskB", "task-a is my family")
-    ])
+    FakeRegistry.new
   end
 
-  def fake_task(*args)
-    FakeTask.new(*args)
+  class FakeCli
+    def initialize(registry)
+      @registry = registry
+    end
+
+    def registry
+      @registry
+    end
   end
 
-  FakeCli = Struct.new(:registry)
-  FakeRegistry = Struct.new(:all)
-  class FakeTask < Struct.new(:name, :description)
-    def to_s
-      "Duty::Tasks::#{name}"
+  class FakeRegistry
+    def plugins
+      [
+        FakePlugin.new
+      ]
+    end
+
+    class FakePlugin
+      def tasks
+        [
+          TaskA,
+          TaskB
+        ]
+      end
+
+      class TaskA
+      end
+
+      class TaskB
+      end
     end
   end
 end

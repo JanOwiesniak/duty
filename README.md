@@ -34,15 +34,6 @@ source duty.completion
 duty <task> [<args>]
 ```
 
-## Core tasks
-
-We already implemented some common use cases you might want to use.
-You get a list of all available tasks by typing:
-
-```
-duty
-```
-
 ## Naming conventions
 
 Task names should be a combination of one verb joined with one or more nouns.
@@ -51,21 +42,6 @@ Examples:
 
 * `start-feature`
 * `continue-feature`
-* `create-pull-request`
-* `accept-pull-request`
-* `reject-pull-request`
-
-### Start a new feature
-
-* It checks out the `master` branch.
-* It creates a new feature branch called `feature/<name>`.
-* It switches to the new feature branch.
-* It sets the upstream to `origin/feature/<name>`.
-* It pushs the new feature branch to origin.
-
-```
-duty start-feature <name>
-```
 
 ## Extend duty with your own tasks
 
@@ -93,7 +69,10 @@ end
 .duty
 
 ```
-tasks: /path/to/my/project/specific/tasks
+tasks:
+  git: /path/to/my/git/specific/tasks
+  projectA: /path/to/my/projectA/specific/tasks
+  projectB: /path/to/my/projectB/specific/tasks
 ```
 
 ### How to use my own task?
@@ -114,6 +93,7 @@ duty <your-task>
 ## Contributing
 
 1. [Fork](http://github.com/JanOwiesniak/duty/fork)
-2. Add executable to your $PATH
-3. Create new feature branch (`duty start-feature <my-awesome-feature>`)
-4. Create new pull request
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request

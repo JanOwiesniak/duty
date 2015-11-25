@@ -2,7 +2,8 @@ module Duty
   module Meta
     class Completion
       def initialize(cli, args)
-        @cli   = cli
+        @registry = cli.registry
+        @humanizer = Humanizer.new
         @input = args.join(" ").downcase
       end
 
@@ -12,9 +13,7 @@ module Duty
 
       private
 
-      def registry
-        @cli.registry
-      end
+      attr_reader :registry, :humanizer
 
       def possible_completions
         matching_tasks.join("\n")
@@ -27,9 +26,14 @@ module Duty
       end
 
       def humanized_tasks
-        humanizer = Humanizer.new
-        registry.all.map do |klass|
-          humanizer.task(klass)
+        registry.plugins.map do |plugin|
+          tasks_for(plugin)
+        end.flatten
+      end
+
+      def tasks_for(plugin)
+        plugin.tasks.map do |task_class|
+          humanizer.task(task_class)
         end
       end
     end

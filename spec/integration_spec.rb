@@ -219,7 +219,7 @@ class IntegrationSpec < MiniTest::Spec
   end
 
   def exec(*tasks)
-    duty_config = "tasks: #{__dir__}/support"
+    duty_config = "tasks:\n  test: #{__dir__}/support"
     Dir.mktmpdir do |dir|
       tasks.each do |task|
         @last_task = capture(task, :chdir => dir, :duty_config => duty_config)

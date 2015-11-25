@@ -2,7 +2,8 @@ module Duty
   module Meta
     class Help
       def initialize(cli)
-        @cli = cli
+        @registry = cli.registry
+        @humanizer = Humanizer.new
       end
 
       def to_s
@@ -11,24 +12,31 @@ module Duty
 
       private
 
-      def registry
-        @cli.registry
-      end
+      attr_reader :registry, :humanizer
 
       def usage
         msg = <<-EOF
-  Usage: duty <task> [<args>]
+Usage: duty <task> [<args>]
 
-  Tasks:
+Tasks:
 
-  #{tasks_with_description}
+#{plugins}
         EOF
       end
 
-      def tasks_with_description
-        humanizer = Humanizer.new
-        registry.all.map do |klass|
-          "  " + humanizer.task(klass).ljust(20) + klass.description
+      def plugins
+        registry.plugins.map do |plugin|
+          [namespace_for(plugin), tasks_for(plugin)].join("\n")
+        end.join("\n")
+      end
+
+      def namespace_for(plugin)
+        "[" + plugin.namespace + "]"
+      end
+
+      def tasks_for(plugin)
+        plugin.tasks.map do |task_class|
+          [" • ", humanizer.task(task_class).ljust(20), task_class.description].join
         end.join("\n")
       end
     end
