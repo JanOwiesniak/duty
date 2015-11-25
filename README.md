@@ -43,6 +43,10 @@ Examples:
 * `start-feature`
 * `continue-feature`
 
+## List of official duty plugins
+
+* [duty-git](https://github.com/JanOwiesniak/duty-git)
+
 ## Extend duty with your own tasks
 
 * Create a new `tasks` dir
