@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "duty/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "Duty"
+  spec.name          = "duty"
   spec.version       = Duty::VERSION
   spec.authors       = ["Jan Owiesniak"]
   spec.email         = ["owiesniak@mailbox.org"]
