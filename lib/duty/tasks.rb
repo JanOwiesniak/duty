@@ -35,9 +35,9 @@ module Duty
       end
 
       def execute
-        ruby(Proc.new{},'Describe your task')
-        ruby(Proc.new{},'Explain your task')
-        ruby(Proc.new{ raise ExecutionError.new },'TODO: Implement your task by overwriting `execute`')
+        ruby('Describe your task') {}
+        ruby('Explain your task') {}
+        ruby('TODO: Implement your task by overwriting `execute`') { raise ExecutionError.new }
       end
 
       private
