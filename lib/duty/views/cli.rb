@@ -1,9 +1,21 @@
+require 'duty/meta'
+
 module Duty
   module Views
     module CLI
       class Normal
-        def initialize(output)
+        def initialize(cli, input, output)
+          @cli = cli
+          @input = input
           @output = output
+        end
+
+        def duty_explain
+          output.print meta_help_message 
+        end
+
+        def task_complete
+          output.print meta_completion_message 
         end
 
         def task_explain(task)
@@ -11,8 +23,8 @@ module Duty
           description = task_class.description
           usage = task_class.usage
 
-          @output.print(description)
-          @output.print(usage)
+          output.print(description)
+          output.print(usage)
         end
 
         def task_success(task)
@@ -23,6 +35,11 @@ module Duty
         def task_failure(task)
           task_name = task.class.name
           failure("#{task_name} task aborted")
+        end
+
+        def task_invalid(error)
+          error_message = "duty: `#{input.join(' ')}` is not a duty task. Failed with: #{error.message}"
+          output.print error_message
         end
 
         def command_success(command)
@@ -37,12 +54,14 @@ module Duty
 
         private
 
+        attr_reader :cli, :input, :output
+
         def success(msg)
-          @output.print([check_mark, msg].join(' '))
+          output.print([check_mark, msg].join(' '))
         end
 
         def failure(msg)
-          @output.error([cross_mark, msg].join(' '))
+          output.error([cross_mark, msg].join(' '))
         end
 
         def cross_mark
@@ -55,6 +74,14 @@ module Duty
 
         def unicode(code)
           ["0x#{code}".hex].pack('U')
+        end
+
+        def meta_help_message
+          Duty::Meta::Help.new(cli).to_s
+        end
+
+        def meta_completion_message
+          Duty::Meta::Completion.new(cli, input.drop(1)).to_s
         end
       end
 

@@ -1,9 +1,9 @@
 module Duty
   class TaskRunner
-    def initialize(view, input, plugins)
+    def initialize(view, input, registry)
       @view = view
       @input = input
-      @plugins = plugins
+      @plugins = registry.plugins
     end
 
     def self.run(view, input, plugins)

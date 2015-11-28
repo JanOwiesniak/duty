@@ -32,11 +32,11 @@ module Duty
           args.include?('-v') || args.include?('--verbose')
         end
 
-        def completion?
+        def needs_completion?
           args.first == '--cmplt'
         end
 
-        def help?
+        def needs_help?
           args.empty? || args == %w(-h) || args == %w(--help)
         end
 

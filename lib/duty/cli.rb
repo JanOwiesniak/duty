@@ -1,9 +1,8 @@
+require 'duty/io'
 require 'duty/registry'
 require 'duty/plugins'
-require 'duty/meta'
-require 'duty/views'
-require 'duty/io'
 require 'duty/task_runner'
+require 'duty/views'
 
 module Duty
   class CLI
@@ -13,76 +12,59 @@ module Duty
     def initialize(args)
       @input = Duty::IO::CLI::Input.new(args)
       @output = Duty::IO::CLI::Output.new($stdout, $stderr)
-      @registry = Duty::Registry.register(available_plugins)
+      @registry = Duty::Registry.register(Duty::Plugins.load(DUTY_CONFIG_FILENAME))
     end
 
     def exec
-      stdout usage if help?
-      stdout completion if completion?
+      explain_duty if needs_help?
+      complete_task if needs_completion?
       execute_task
     end
 
     private
 
-    def stdout(string)
-      @output.print(string)
+    attr_reader :input, :output
+
+    def explain_duty
+      view.duty_explain
       exit 0
     end
 
-    def available_plugins
-      Duty::Plugins.load(DUTY_CONFIG_FILENAME)
+    def needs_help?
+      input.needs_help?
     end
 
-    def usage
-      Duty::Meta::Help.new(self).to_s
+    def complete_task
+      view.task_complete
+      exit 0
     end
 
-    def help?
-      input.help?
-    end
-
-    def completion
-      Duty::Meta::Completion.new(self, input.drop(1)).to_s
-    end
-
-    def completion?
-      input.completion?
+    def needs_completion?
+      input.needs_completion?
     end
 
     def execute_task
       begin
         try_to_run_task
-      rescue NameError => e
-        stdout invalid_task(e.message)
+      rescue NameError => error
+        view.task_invalid(error)
       end
     end
 
     def try_to_run_task
-      TaskRunner.run(view, input, plugins)
+      Duty::TaskRunner.run(view, input, registry)
     end
 
     def view
-      verbose? ? Duty::Views::CLI::Verbose.new(output) : Duty::Views::CLI::Normal.new(output)
-    end
-
-    def output
-      @output
-    end
-
-    def input
-      @input
+      if verbose?
+        Duty::Views::CLI::Verbose.new(self, input, output)
+      else
+        Duty::Views::CLI::Normal.new(self, input, output)
+      end
     end
 
     def verbose?
       input.verbose?
-    end
-
-    def plugins
-      @registry.plugins
-    end
-
-    def invalid_task(error_message)
-      "duty: `#{input.join(' ')}` is not a duty task. Failed with: #{error_message}"
     end
   end
 end
