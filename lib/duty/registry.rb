@@ -1,7 +1,7 @@
 module Duty
   class Registry
-    def self.load(plugins = [])
-      new(plugins).tap {|registry| registry.require_tasks }
+    def self.register(plugins = [])
+      new(plugins).tap {|registry| registry.load_tasks }
     end
 
     attr_reader :plugins
@@ -9,8 +9,8 @@ module Duty
       @plugins = plugins
     end
 
-    def require_tasks
-      plugins.each {|plugin| plugin.require_tasks }
+    def load_tasks
+      plugins.each {|plugin| plugin.load_tasks }
     end
   end
 end

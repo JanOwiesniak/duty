@@ -4,46 +4,64 @@ require 'yaml'
 module Duty
   module Plugins
     def self.load(filename)
-      if File.exists?(filename)
-        duty_config = YAML.load(File.read(filename))
-        tasks = duty_config["tasks"]
-        tasks.map do |namespace, task_dir|
-          Plugin.new(namespace, task_dir) if Dir.exists?(task_dir)
+      Duty::Plugins::List.new.tap do |list|
+        if File.exists?(filename)
+          duty_config = YAML.load(File.read(filename))
+          tasks = duty_config["tasks"]
+          tasks.each do |namespace, plugin_entry_point|
+            list << Plugin.new(namespace, plugin_entry_point)
+          end
         end
       end
     end
 
+    class List
+      require 'forwardable'
+      include Enumerable
+      extend Forwardable
+      def_delegators :@plugins, :each, :<<
+      def initialize
+        @plugins = []
+      end
+    end
+
     class Plugin
-      TASK_NAMESPACE = Duty::Tasks
-      def initialize(namespace, task_dir)
+      def initialize(namespace, entry)
         @namespace = namespace
-        @task_dir = task_dir
+        @entry = entry
+        @tasks = []
       end
 
       def namespace
         @namespace
       end
 
-      def require_tasks
-        task_files = File.expand_path(File.join(@task_dir, "*.rb"))
-        Dir[task_files].each do |path|
-          require path.gsub(/(\.rb)$/, '')
+      def tasks
+        @task_classes.select do |task_class|
+          valid?(task_class)
         end
       end
 
-      def tasks
-        task_names = TASK_NAMESPACE.constants - [:Base]
-        task_names.reduce([]) do |task_classes, task_name|
-          task_class = TASK_NAMESPACE.const_get(task_name)
-          task_classes << task_class if valid?(task_class)
-          task_classes
-        end
+      def load_tasks
+        require_tasks
+        expose_tasks
+      end
+
+      private
+
+      def require_tasks
+        path = @entry.gsub(/\.rb/,'')
+        require path
+      end
+
+      def expose_tasks
+        @task_classes = eval(File.read(@entry)).tasks
       end
 
       private
 
       def valid?(task_class)
-        task_class.superclass == TASK_NAMESPACE::Base
+        task_class.ancestors.include? ::Duty::Tasks::Base
       end
     end
   end
