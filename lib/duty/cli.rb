@@ -2,6 +2,7 @@ require 'duty/registry'
 require 'duty/plugins'
 require 'duty/meta'
 require 'duty/views'
+require 'duty/io'
 
 module Duty
   class CLI
@@ -9,8 +10,8 @@ module Duty
     attr_reader :registry
 
     def initialize(args)
-      @input = Input.new(args)
-      @output = Output.new($stdout, $stderr)
+      @input = Duty::IO::CLI::Input.new(args)
+      @output = Duty::IO::CLI::Output.new($stdout, $stderr)
       @registry = Duty::Registry.register(available_plugins)
     end
 
@@ -120,61 +121,6 @@ module Duty
 
       def task_name
         @input.task_name
-      end
-    end
-
-    class Input
-      def initialize(args)
-        @args = [args].flatten
-      end
-
-      def[](index)
-        @args[index]
-      end
-
-      def task_name
-        task, *rest = @args
-        task
-      end
-
-      def task_input
-        task, *rest = @args
-        rest
-      end
-
-      def drop(index)
-        @args.drop(1)
-      end
-
-      def join(seperator='')
-        @args.join(seperator)
-      end
-
-      def verbose?
-        @args.include?('-v') || @args.include?('--verbose')
-      end
-
-      def completion?
-        @args.first == '--cmplt'
-      end
-
-      def help?
-        @args.empty? || @args == %w(-h) || @args == %w(--help)
-      end
-    end
-
-    class Output
-      def initialize(stdout, stderr)
-        @stdout = stdout
-        @stderr = stderr
-      end
-
-      def print(*args)
-        @stdout.puts(*args)
-      end
-
-      def error(*args)
-        @stderr.puts(*args)
       end
     end
   end
