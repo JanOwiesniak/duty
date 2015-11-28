@@ -59,22 +59,27 @@ module Duty
 
       def task_explain
         @view.task_explain(self)
+        self
       end
 
       def task_success
         @view.task_success(self)
+        self
       end
 
       def task_failure
         @view.task_failure(self)
+        self
       end
 
       def command_success(command)
         @view.command_success(command)
+        command
       end
 
       def command_failure(command)
         @view.command_failure(command)
+        command
       end
 
       def parallel(&blk)
@@ -138,6 +143,7 @@ module Duty
           ensure
             @logger << summary 
             @logger << error
+            @callable
           end
         end
 
@@ -164,6 +170,7 @@ module Duty
           ensure
             @logger << summary 
             @logger << error
+            [@stdout, @stderr, @status]
           end
         end
 
