@@ -17,7 +17,6 @@ $ gem install duty
 ```
 $ export PATH="$PATH:$HOME/path/to/duty/bin"
 ```
-```
 
 ## Add shell completion
 
