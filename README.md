@@ -25,7 +25,7 @@ This gem supports a simple shell completion for
 To enable this feature load the completion functions:
 
 ```
-source duty.completion
+$ source duty.completion
 ```
 
 ## Usage
@@ -34,112 +34,110 @@ source duty.completion
 $ duty <task> [<args>]
 ```
 
-## Naming conventions
-
-Task names should be a combination of one verb joined with one or more nouns.
-
-Examples:
-
-* `start-feature`
-* `continue-feature`
-
 ## List of official duty plugins
 
 * [duty-git](https://github.com/JanOwiesniak/duty-git)
 
 ## Extend duty with your own plugins
 
-* Create a new file that implements the plugin behaviour (defined below)
+* Create a new file that implements the plugin behaviour
 * Create a .duty file e.g. in your project dir
 
-### How does a basic plugin looks like?
+### How does a duty plugin looks like?
 
-path/to/your/duty-plugins/my_project_specific_plugin.rb
+Example: `/path/to/your/duty-plugins/my_duty_plugin.rb`
 
 ```ruby
 require 'duty'
 
-module Duty
-  module ProjectA
-    def self.tasks
-      [
-        Tasks::MyFistTask,
-        Tasks::ContinueFeature
-      ]
+module MyDutyPlugin
+  def self.tasks
+    [
+      MyDutyTasks::MyFirstTask,
+      MyDutyTasks::ContinueFeature
+    ]
+  end
+end
+
+module MyDutyTasks
+  class MyFirstTask < ::Duty::Tasks::Base
+  end
+
+  class ContinueFeature < ::Duty::Tasks::Base
+    def self.description
+      "Continue on an already existing feature"
     end
 
-    module Tasks
-      class MyFistTask < ::Duty::Tasks::Base
-      end
+    def self.usage
+      "duty continue-feature <feature-name>"
+    end
 
-      class ContinueFeature < ::Duty::Tasks::Base
-        def self.description
-          "Continue on an already existing feature"
-        end
+    def valid?
+      !!feature_name
+    end
 
-        def self.usage
-          "duty continue-feature <feature-name>"
-        end
+    # Everthing in here will be executed sequential
+    def execute
 
-        def valid?
-          !!feature_name
-        end
+      # Execute ruby code
+      ruby("Do something useful in ruby") { Object.new }
 
-        # Everthing in here will be executed sequential
-        def execute
+      # Execute something on the shell
+      sh("Checkout `feature/#{feature_name}` branch") { "git checkout feature/#{feature_name}" }
 
-          # Execute ruby code
-          ruby("Do something useful in ruby") { Object.new }
+      # Wrap things up in a parallel block if you want to run commands in isolation
+      # A failing command inside a parallel does not stop the sequential execution of outer commands
+      parallel { ruby("Run ruby in isolation") { raise RuntimeError.new } }
 
-          # Execute something on the shell
-          sh("Checkout `feature/#{feature_name}` branch") { "git checkout feature/#{feature_name}" }
+      # This will be executed even if the ruby above raises an RuntimeError
+      parallel { sh("Run shell in isolation") { 'pwd' } }
 
-          # Wrap things up in a parallel block if you want to run commands in isolation
-          # A failing command inside a parallel does not stop the sequential execution of outer commands
-          parallel { ruby("Run ruby in isolation") { raise RuntimeError.new } }
+    end
 
-          # This will be executed even if the ruby above raises an RuntimeError
-          parallel { sh("Run shell in isolation") { 'pwd' } }
+    private
 
-        end
-
-        private
-
-        def feature_name
-          @feature_name =|| @arguments.first
-        end
-      end
+    def feature_name
+      @feature_name =|| @arguments.first
     end
   end
 end
 
-Duty::Git
+# Return your duty module
+
+MyDutyPlugin
 ```
 
-### How does a .duty file looks like?
+## Task naming conventions
 
-.duty
+A task class named `StartFeature` would be accessible through the CLI via.
+Task names should be a combination of one verb joined with one or more nouns.
+
+```
+$ duty start-feature
+```
+
+### How to use my own tasks?
+
+Create a duty plugin and add it to your `.duty` file.
 
 ```
 tasks:
   git: /path/to/duty-git/lib/duty/git.rb
-  projectA: /path/to/projectA/tasks.rb
+  projectA: /path/to/projectA/my_duty_plugin.rb
   projectB: /path/to/projectB/i_dont_care_about_naming.rb
 ```
-
-### How to use my own task?
 
 Your new tasks will be immediately available from the CLI.
 
 ```
-duty
+$ duty
 ```
 
 Fire up the CLI and execute your new task.
 Duty will tell you what you have to do next.
 
 ```
-duty <your-task>
+$ duty <your-task>
 ```
 
 ## Contributing
