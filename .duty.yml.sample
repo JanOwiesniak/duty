@@ -1,1 +1,4 @@
-tasks: /path/to/my/project/specific/tasks
+tasks:
+  git: /path/to/duty-git/lib/duty/git.rb
+  projectA: /path/to/projectA/tasks.rb
+  projectB: /path/to/projectB/i_dont_care_about_naming.rb
