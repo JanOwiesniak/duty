@@ -47,25 +47,73 @@ Examples:
 
 * [duty-git](https://github.com/JanOwiesniak/duty-git)
 
-## Extend duty with your own tasks
+## Extend duty with your own plugins
 
-* Create a new `tasks` dir
-* Create one or more duty task files in there
-* Create a .duty file e.g. in your home dir
+* Create a new file that implements the plugin behaviour (defined below)
+* Create a .duty file e.g. in your project dir
 
-### How does a basic duty task looks like?
+### How does a basic plugin looks like?
 
-path/to/your/new/tasks/my_new_task.rb
+path/to/your/duty-plugins/my_project_specific_plugin.rb
 
 ```ruby
-require 'duty/tasks/base'
+require 'duty'
 
 module Duty
-  module Tasks
-    class MyNewTask < Duty::Tasks::Base
+  module ProjectA
+    def self.tasks
+      [
+        Tasks::MyFistTask,
+        Tasks::ContinueFeature
+      ]
+    end
+
+    module Tasks
+      class MyFistTask < ::Duty::Tasks::Base
+      end
+
+      class ContinueFeature < ::Duty::Tasks::Base
+        def self.description
+          "Continue on an already existing feature"
+        end
+
+        def self.usage
+          "duty continue-feature <feature-name>"
+        end
+
+        def valid?
+          !!feature_name
+        end
+
+        # Everthing in here will be executed sequential
+        def execute
+
+          # Execute ruby code
+          ruby("Do something useful in ruby") { Object.new }
+
+          # Execute something on the shell
+          sh("Checkout `feature/#{feature_name}` branch") { "git checkout feature/#{feature_name}" }
+
+          # Wrap things up in a parallel block if you want to run commands in isolation
+          # A failing command inside a parallel does not stop the sequential execution of outer commands
+          parallel { ruby("Run ruby in isolation") { raise RuntimeError.new } }
+
+          # This will be executed even if the ruby above raises an RuntimeError
+          parallel { sh("Run shell in isolation") { 'pwd' } }
+
+        end
+
+        private
+
+        def feature_name
+          @feature_name =|| @arguments.first
+        end
+      end
     end
   end
 end
+
+Duty::Git
 ```
 
 ### How does a .duty file looks like?
@@ -74,14 +122,14 @@ end
 
 ```
 tasks:
-  git: /path/to/my/git/specific/tasks
-  projectA: /path/to/my/projectA/specific/tasks
-  projectB: /path/to/my/projectB/specific/tasks
+  git: /path/to/duty-git/lib/duty/git.rb
+  projectA: /path/to/projectA/tasks.rb
+  projectB: /path/to/projectB/i_dont_care_about_naming.rb
 ```
 
 ### How to use my own task?
 
-Your new task will be immediately available from the CLI.
+Your new tasks will be immediately available from the CLI.
 
 ```
 duty
