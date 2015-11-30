@@ -3,14 +3,10 @@ require 'yaml'
 
 module Duty
   module Plugins
-    def self.load(filename)
+    def self.load(config)
       Duty::Plugins::List.new.tap do |list|
-        if File.exists?(filename)
-          duty_config = YAML.load(File.read(filename))
-          tasks = duty_config["tasks"]
-          tasks.each do |namespace, plugin_entry_point|
-            list << Plugin.new(namespace, plugin_entry_point)
-          end
+        config["tasks"].each do |namespace, plugin_entry_point|
+          list << Plugin.new(namespace, plugin_entry_point)
         end
       end
     end

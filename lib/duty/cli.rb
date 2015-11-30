@@ -1,3 +1,4 @@
+require 'duty/config_loader'
 require 'duty/io'
 require 'duty/registry'
 require 'duty/plugins'
@@ -6,13 +7,12 @@ require 'duty/views'
 
 module Duty
   class CLI
-    DUTY_CONFIG_FILENAME = '.duty.yml'
     attr_reader :registry
 
     def initialize(args)
       @input = Duty::IO::CLI::Input.new(args)
       @output = Duty::IO::CLI::Output.new($stdout, $stderr)
-      @registry = Duty::Registry.register(Duty::Plugins.load(DUTY_CONFIG_FILENAME))
+      @registry = Duty::Registry.register(Duty::Plugins.load(load_config))
     end
 
     def exec
@@ -65,6 +65,10 @@ module Duty
 
     def verbose?
       input.verbose?
+    end
+
+    def load_config
+      Duty::ConfigLoader.new.load(Dir.pwd)
     end
   end
 end
