@@ -12,7 +12,8 @@ module Duty
     def initialize(args)
       @input = Duty::IO::CLI::Input.new(args)
       @output = Duty::IO::CLI::Output.new($stdout, $stderr)
-      @registry = Duty::Registry.register(Duty::Plugins.load(load_config))
+      @registry = Duty::Registry.instance
+      load_plugins
     end
 
     def exec
@@ -67,7 +68,11 @@ module Duty
       input.verbose?
     end
 
-    def load_config
+    def load_plugins
+      Duty::Plugins.load(config)
+    end
+
+    def config
       Duty::ConfigLoader.new.load(Dir.pwd)
     end
   end

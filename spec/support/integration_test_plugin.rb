@@ -1,5 +1,9 @@
 module Duty
   module IntegrationTest
+    def self.namespace
+      'test'
+    end
+
     def self.tasks
       [
         ::Duty::IntegrationTest::Tasks::Test
@@ -82,4 +86,4 @@ module Duty
   end
 end
 
-Duty::IntegrationTest
+Duty::Registry.register(Duty::IntegrationTest)
