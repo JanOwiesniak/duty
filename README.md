@@ -34,16 +34,37 @@ $ source duty.completion
 $ duty <task> [<args>]
 ```
 
-## List of official duty plugins
+## Plugins
+
+Duty ships with a plugin mechanism.
+You can define tasks by using existing duty plugins or writing your own.
+
+### Install a plugin
+
+Install a plugin you want to use globally e.g.
+
+```
+gem install duty-git
+```
+
+or add it to your `Gemfile` e.g.
+
+```
+gem 'duty-git'
+```
+
+Add it to your `.duty` file. e.g.
+
+```
+tasks:
+  - duty/git
+```
+
+### List of existing duty plugins
 
 * [duty-git](https://github.com/JanOwiesniak/duty-git)
 
-## Extend duty with your own plugins
-
-* Create a new file that implements the plugin behaviour
-* Create a .duty file e.g. in your project dir
-
-### How does a duty plugin looks like?
+## Extend duty with your own plugin
 
 Example: `/path/to/your/duty-plugins/my_duty_plugin.rb`
 
@@ -120,13 +141,11 @@ $ duty start-feature
 
 ### How to use my own tasks?
 
-Create a duty plugin and add it to your `.duty` file.
+Deploy it as a gem and install it as described in the `Install a plugin` section above or link it against the absolute path in your `.duty` file.
 
 ```
 tasks:
-  - /path/to/duty-git/lib/duty/git.rb
-  - /path/to/projectA/my_duty_plugin.rb
-  - /path/to/projectB/i_dont_care_about_naming.rb
+  - /path/to/your/duty-plugins/my_duty_plugin
 ```
 
 Your new tasks will be immediately available from the CLI.
