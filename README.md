@@ -51,6 +51,10 @@ Example: `/path/to/your/duty-plugins/my_duty_plugin.rb`
 require 'duty'
 
 module MyDutyPlugin
+  def self.namespace
+    'i am special'
+  end
+
   def self.tasks
     [
       MyDutyTasks::MyFirstTask,
@@ -102,9 +106,7 @@ module MyDutyTasks
   end
 end
 
-# Return your duty module
-
-MyDutyPlugin
+Duty::Registry.register(MyDutyPlugin)
 ```
 
 ## Task naming conventions
@@ -122,9 +124,9 @@ Create a duty plugin and add it to your `.duty` file.
 
 ```
 tasks:
-  git: /path/to/duty-git/lib/duty/git.rb
-  projectA: /path/to/projectA/my_duty_plugin.rb
-  projectB: /path/to/projectB/i_dont_care_about_naming.rb
+  - /path/to/duty-git/lib/duty/git.rb
+  - /path/to/projectA/my_duty_plugin.rb
+  - /path/to/projectB/i_dont_care_about_naming.rb
 ```
 
 Your new tasks will be immediately available from the CLI.
