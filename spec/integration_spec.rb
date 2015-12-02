@@ -219,7 +219,7 @@ class IntegrationSpec < MiniTest::Spec
   end
 
   def exec(*tasks)
-    duty_config = "tasks:\n  test: #{__dir__}/support/integration_test_plugin.rb"
+    duty_config = "tasks:\n  - #{__dir__}/support/integration_test_plugin.rb"
     Dir.mktmpdir do |dir|
       tasks.each do |task|
         @last_task = capture(task, :chdir => dir, :duty_config => duty_config)
